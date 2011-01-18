@@ -1,0 +1,128 @@
+Git Scribe
+===================
+
+The git-scribe tool is a simple command line toolset to help you use Git, GitHub and Asciidoc
+to write e-books.  This provides tools for setting up the structure, collaborating with co-authors,
+doing technical and copy-editing, handling translations, taking errata, as well as publishing 
+online, pdf, mobi (Kindle) and epub (iBooks, Nook) versions.
+
+Easy: Syntax-Highlighted Code, Formula, Diagrams
+Online: Comment, Search, Permalinks
+Sell: Kindle, iBooks, Lulu, Pledgie(?)
+
+https://github.com/oreilly/couchdb-guide
+
+Start a Book
+===================
+
+    $ git scribe init (--type=[code,math]) (--license=[public,cc]) (--lang=en) [project]
+
+Generates a skeleton, license file and readmes with instructions for authors and contributors.
+Also records version of scribe workflow we're using into .gitscribe file.
+
+* shows cheat-sheet of how to use grep, tag, diff (--word)
+
+Work on a Book
+===================
+
+    $ git scribe check
+
+Run checks to make sure you have all the tools you need and your system can do stuff.
+
+    $ git scribe register (--role=[author,reviewer,editor,translator])
+
+Register yourself and your role in this book.
+  kept in .git/scribe
+
+To Do List
+===================
+
+    $ git scribe todo
+
+* lists boilerplate you still haven't filled out 
+  (title, author, description, chapter, cover, bio, biblio, price, license, etc)
+  most of that is kept in .gitscribe
+
+Writing
+===================
+
+    $ git scribe new chapter
+
+Editing
+===================
+
+    $ git scribe review
+
+TODO: address technical reviewing and copy-editing
+
+Translating - Translator
+========================
+
+    $ git scribe trans start (--edition=1.1) de
+
+Sets up pre-commit hook to check that commit message is formatted correctly, copies over main language to 'de'
+http://en.wikipedia.org/wiki/IETF_language_tag
+
+    $ git scribe trans changes (--since=2010-01-01)
+
+    $ git scribe trans done SHA
+
+Translating - Maintainer
+========================
+
+    $ git scribe trans complete
+
+See which translations are what percent complete.
+
+- get list of translators for each translation
+
+Editions
+===================
+
+This is meant to be done infrequently - like an edition of a book or a major version of a framework that is
+being documented.  Publishing editions too often makes work difficult on translators, so be prudent.
+
+    $ git scribe publish 1.1
+
+Tags the edition, copies the source into editions/1.1/en so translators can work from that point.
+
+Generate Media
+===================
+
+    $ git scribe gen (--lang=de) (--edition=1.0) [site,pdf,mobi,epub]
+
+OR
+
+    $ git push origin
+
+Sell
+===================
+
+    $ git scribe sell --price=8.00 [--lang=de] (ibooks,kindle,nook,lulu)
+
+
+Layout
+===================
+
+The layout that the `git scribe init` produces looks like this:
+
+* book/
+|`--* 00_frontmatter.asciidoc
+|`--* 01_first_chapter.asciidoc
+|`--* 02_second_chapter.asciidoc
+|`--* 99_backmatter.asciidoc
+|`--* img/
+|    `--* 01.01-example-image.png
+|    `--* 01.02-another-image.png
+|    `--* 02.01-an-image.png
+* style/
+|`--* style.css
+* site/
+|`--* layout.html
+* code/
+|`--* 01_example.rb
+* test/
+|`--* 01_test.rb
+* LICENSE.txt
+* README.asciidoc
+* .gitscribe
