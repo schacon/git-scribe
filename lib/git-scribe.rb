@@ -84,6 +84,7 @@ class GitScribe
 
   def do_pdf
     puts "GENERATING PDF"
+    # TODO: syntax highlighting (fop?)
     `#{a2x('pdf')} #{BOOK_FILE}`
     if $?.exitstatus == 0
       'book.pdf'
@@ -92,6 +93,7 @@ class GitScribe
 
   def do_epub
     puts "GENERATING EPUB"
+    # TODO: look for custom stylesheets
     `#{a2x_wss('epub')} --epubcheck #{BOOK_FILE}`
     puts 'exit status', $?.exitstatus
     'book.epub'
@@ -99,16 +101,20 @@ class GitScribe
 
   def do_html
     puts "GENERATING HTML"
-    `#{a2x_wss('xhtml')} #{BOOK_FILE}`
+    # TODO: look for custom stylesheets
+    #puts `#{a2x_wss('xhtml')} -v #{BOOK_FILE}`
+    styledir = File.expand_path(File.join(Dir.pwd, 'stylesheets'))
+    puts cmd = "asciidoc -a stylesdir=#{styledir} -a theme=handbookish #{BOOK_FILE}"
+    `#{cmd}`
     puts 'exit status', $?.exitstatus
     'book.html'
   end
 
   def do_site
     puts "GENERATING SITE"
-    `#{a2x_wss('chunked')} #{BOOK_FILE}`
-    puts 'exit status', $?.exitstatus
-    'book.html'
+    # TODO: check if html was already done
+    do_html
+    # TODO: split html file into chunked site, apply templates
   end
 
 

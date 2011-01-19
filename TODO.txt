@@ -1,10 +1,7 @@
 To-Do List
 =============
 
-* images
-* nested dir (w/images)
 * code highlighting
-* external code pull w/ highlighting
 * auto-links to pdf/epub/mobi in site
 * custom/alternate themes (stylesheets)
 * cover page for site (author, about, etc)

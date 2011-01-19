@@ -21,3 +21,8 @@ sem vivamus vel ac.
 source~~~~
 include::hello.c[]
 source~~~~
+
+== Source Code Highlighting
+
+[source,python]
+if n < 0: print 'Hello World!'
