@@ -12,6 +12,8 @@ Sell: Kindle, iBooks, Lulu, Pledgie(?)
 
 https://github.com/oreilly/couchdb-guide
 
+A good cheat sheet: http://powerman.name/doc/asciidoc#_text
+
 Start a Book
 ===================
 
@@ -111,16 +113,16 @@ The layout that the `git scribe init` produces looks like this:
 |`--* 01_first_chapter.asciidoc
 |`--* 02_second_chapter.asciidoc
 |`--* 99_backmatter.asciidoc
-|`--* img/
+|`--* image/
 |    `--* 01.01-example-image.png
 |    `--* 01.02-another-image.png
 |    `--* 02.01-an-image.png
+|`--* include/
+|    `--* 02.01-code.c
 * style/
 |`--* style.css
 * site/
 |`--* layout.html
-* code/
-|`--* 01_example.rb
 * test/
 |`--* 01_test.rb
 * LICENSE.txt

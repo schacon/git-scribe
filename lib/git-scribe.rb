@@ -68,15 +68,23 @@ class GitScribe
   def prepare_output_dir
     Dir.mkdir('output') rescue nil
     Dir.chdir('output') do
+      Dir.mkdir('resources') rescue nil
       Dir.mkdir('stylesheets') rescue nil
       from_stdir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'stylesheets'))
       FileUtils.cp_r from_stdir, '.'
     end
   end
 
+  def a2x(type)
+    "a2x -f #{type} -d book -r resources"
+  end
+  def a2x_wss(type)
+    a2x(type) + " --stylesheet=stylesheets/handbookish.css"
+  end
+
   def do_pdf
     puts "GENERATING PDF"
-    `a2x -f pdf -d book #{BOOK_FILE}`
+    `#{a2x('pdf')} #{BOOK_FILE}`
     if $?.exitstatus == 0
       'book.pdf'
     end
@@ -84,21 +92,21 @@ class GitScribe
 
   def do_epub
     puts "GENERATING EPUB"
-    `a2x -f epub -d book --epubcheck --stylesheet=stylesheets/handbookish.css #{BOOK_FILE}`
+    `#{a2x_wss('epub')} --epubcheck #{BOOK_FILE}`
     puts 'exit status', $?.exitstatus
     'book.epub'
   end
 
   def do_html
     puts "GENERATING HTML"
-    `a2x -f xhtml -d book --stylesheet=stylesheets/handbookish.css #{BOOK_FILE}`
+    `#{a2x_wss('xhtml')} #{BOOK_FILE}`
     puts 'exit status', $?.exitstatus
     'book.html'
   end
 
   def do_site
     puts "GENERATING SITE"
-    `a2x -f chunked -d book --stylesheet=stylesheets/handbookish.css #{BOOK_FILE}`
+    `#{a2x_wss('chunked')} #{BOOK_FILE}`
     puts 'exit status', $?.exitstatus
     'book.html'
   end
@@ -112,6 +120,12 @@ class GitScribe
         f.puts File.read(file)
       end
     end
+    files = Dir.glob("book/image/**/*")
+    FileUtils.cp_r(files, 'output/resources/')
+
+    files = Dir.glob("book/include/**/*")
+    FileUtils.cp_r(files, 'output/')
+    pp files
   end
 
   # DISPLAY HELPER FUNCTIONS #
