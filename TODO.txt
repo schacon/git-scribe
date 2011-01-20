@@ -1,11 +1,11 @@
 To-Do List
 =============
 
-* code highlighting
+* multi-page site
+* custom site layouts
 * auto-links to pdf/epub/mobi in site
 * custom/alternate themes (stylesheets)
 * cover page for site (author, about, etc)
-* custom site layouts (jekyll)
 * book cover (w/template)
 * github pages publishing
 * checking for proper tools

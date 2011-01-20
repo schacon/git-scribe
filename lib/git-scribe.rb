@@ -1,3 +1,6 @@
+require 'rubygems'
+require 'nokogiri'
+
 require 'fileutils'
 require 'pp'
 
@@ -36,7 +39,7 @@ class GitScribe
     # look for a2x (asciidoc, latex, xsltproc)
   end
 
-  BOOK_FILE = 'book.asciidoc'
+  BOOK_FILE = 'book.asc'
 
   OUTPUT_TYPES = ['pdf', 'epub', 'mobi', 'html', 'site']
 
@@ -68,7 +71,6 @@ class GitScribe
   def prepare_output_dir
     Dir.mkdir('output') rescue nil
     Dir.chdir('output') do
-      Dir.mkdir('resources') rescue nil
       Dir.mkdir('stylesheets') rescue nil
       from_stdir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'stylesheets'))
       FileUtils.cp_r from_stdir, '.'
@@ -78,6 +80,7 @@ class GitScribe
   def a2x(type)
     "a2x -f #{type} -d book -r resources"
   end
+
   def a2x_wss(type)
     a2x(type) + " --stylesheet=stylesheets/handbookish.css"
   end
@@ -85,7 +88,7 @@ class GitScribe
   def do_pdf
     puts "GENERATING PDF"
     # TODO: syntax highlighting (fop?)
-    `#{a2x('pdf')} #{BOOK_FILE}`
+    `#{a2x('pdf')} --dblatex-opts "-P latex.output.revhistory=0" #{BOOK_FILE}`
     if $?.exitstatus == 0
       'book.pdf'
     end
@@ -102,7 +105,7 @@ class GitScribe
   def do_html
     puts "GENERATING HTML"
     # TODO: look for custom stylesheets
-    #puts `#{a2x_wss('xhtml')} -v #{BOOK_FILE}`
+    puts `#{a2x_wss('xhtml')} -v #{BOOK_FILE}`
     styledir = File.expand_path(File.join(Dir.pwd, 'stylesheets'))
     puts cmd = "asciidoc -a stylesdir=#{styledir} -a theme=handbookish #{BOOK_FILE}"
     `#{cmd}`
@@ -113,7 +116,12 @@ class GitScribe
   def do_site
     puts "GENERATING SITE"
     # TODO: check if html was already done
-    do_html
+    puts `asciidoc -b docbook #{BOOK_FILE}`
+    xsldir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'xsl'))
+    puts "xsltproc --stringparam html.stylesheet stylesheets/handbookish.css --nonet #{xsldir}/chunked.xsl book.xml"
+    `xsltproc --stringparam html.stylesheet stylesheets/handbookish.css --nonet #{xsldir}/chunked.xsl book.xml`
+    #source = File.read('book.html')
+    #html = Nokogiri::XML.parse(source)
     # TODO: split html file into chunked site, apply templates
   end
 
