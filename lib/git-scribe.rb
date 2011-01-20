@@ -122,7 +122,7 @@ class GitScribe
     `xsltproc --stringparam html.stylesheet stylesheets/handbookish.css --nonet #{xsldir}/chunk.xsl book.xml`
 
     source = File.read('index.html')
-    html = Nokogiri::XML.parse(source)
+    html = Nokogiri::HTML.parse(source, nil, 'utf-8')
 
     sections = []
     c = -1
@@ -196,7 +196,7 @@ class GitScribe
         source = File.read(section['href'])
         puts source
 
-        html = Nokogiri::XML.parse(source)
+        html = Nokogiri::HTML.parse(source, nil, 'utf-8')
 
         content = html.css('div.section').first.to_html
 
@@ -215,7 +215,7 @@ class GitScribe
           }
           f.puts page_template.render( data )
         end
-        File.unlink(section['href'])
+        #File.unlink(section['href'])
 
         puts i
         puts section['title']
