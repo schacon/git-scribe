@@ -132,7 +132,7 @@ class GitScribe
       section.children.each do |item|
         if item.name == 'dt' # section
           c += 1
-          sections[c] ||= {}
+          sections[c] ||= {'number' => c}
           link = item.css('a').first
           sections[c]['title'] = title = link.text
           sections[c]['href'] = href = link['href']
@@ -145,7 +145,7 @@ class GitScribe
         end
         if item.name == 'dd' # subsection
           item.css('dt').each do |sub|
-            link = item.css('a').first
+            link = sub.css('a').first
             data = {}
             data['title'] = title = link.text
             data['href'] = href = link['href']
@@ -157,23 +157,35 @@ class GitScribe
       puts
     end
 
+    pp sections
+
     book_title = html.css('head > title').text
-    content = html.css('div.section').first.to_html
-    header = html.css('div.navheader').to_html
-    footer = html.css('div.navfooter').to_html
+    content = html.css('body > div')[1]
+    content.css('.toc').first.remove
+    content = content.inner_html
+
+    puts content 
+    sections.each do |s|
+      content.gsub!(s['href'], s['link'])
+    end
 
     template_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'site', 'default'))
+
+    # copy the template files in
+    files = Dir.glob(template_dir + '/*')
+    FileUtils.cp_r files, '.'
+
     Liquid::Template.file_system = Liquid::LocalFileSystem.new(template_dir)
     index_template = Liquid::Template.parse(File.read(File.join(template_dir, 'index.html')))
     page_template = Liquid::Template.parse(File.read(File.join(template_dir, 'page.html')))
 
     # write the index page
+    main_data = { 
+      'book_title' => book_title,
+      'sections' => sections
+    }
     File.open('index.html', 'w+') do |f|
-      data = { 
-        'title' => book_title,
-        'sections' => sections
-      }
-      f.puts index_template.render( data )
+      f.puts index_template.render( main_data )
     end
 
     # write the title page
@@ -186,6 +198,7 @@ class GitScribe
         'next' => sections[1],
         'content' => content
       }
+      data.merge!(main_data)
       f.puts page_template.render( data )
     end
 
@@ -194,11 +207,12 @@ class GitScribe
 
       if i > 0 # skip title page
         source = File.read(section['href'])
-        puts source
-
         html = Nokogiri::HTML.parse(source, nil, 'utf-8')
 
-        content = html.css('div.section').first.to_html
+        content = html.css('body > div')[1].to_html
+        sections.each do |s|
+          content.gsub!(s['href'], s['link'])
+        end
 
         File.open(section['link'], 'w+') do |f|
           next_section = nil
@@ -213,6 +227,7 @@ class GitScribe
             'next' => next_section,
             'content' => content
           }
+          data.merge!(main_data)
           f.puts page_template.render( data )
         end
         #File.unlink(section['href'])

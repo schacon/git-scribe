@@ -2,11 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" href="stylesheets/handbookish.css" type="text/css" />
-    <title>Page {{title}}</title>
+    <link rel="stylesheet" href="master.css" type="text/css" />
+    <title>{{title}}</title>
   </head>
 
   <body>
+    <div class="nav" id="navheader">
     <table width="100%">
       <tr><td width="33%" align="left">
         {% if prev %}
@@ -16,6 +17,7 @@
       </td><td width="33%" align="center">
         {% if prev %}
          <a href="{{home.link}}">Home</a><br/>
+         <strong>{{ book_title }}</strong>
         {% endif %}
       </td><td width="33%" align="right">
         {% if next %}
@@ -24,13 +26,17 @@
         {% endif %}
       </td></tr>
     </table>
+    </div>
 
     <hr/>
 
-    {{content}}
+    <div class="content">
+      {{content}}
+    </div>
 
     <hr/>
 
+    <div class="nav" id="navfooter">
     <table width="100%">
       <tr><td width="33%" align="left">
         {% if prev %}
@@ -40,6 +46,7 @@
       </td><td width="33%" align="center">
         {% if prev %}
          <a href="{{home.link}}">Home</a><br/>
+         {{ book_title }}
         {% endif %}
       </td><td width="33%" align="right">
         {% if next %}
@@ -48,6 +55,6 @@
         {% endif %}
       </td></tr>
     </table>
-
+    </div>
   </body>
 </html>

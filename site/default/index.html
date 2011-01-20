@@ -2,28 +2,32 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" href="stylesheets/handbookish.css" type="text/css" />
-    <title>{{title}}</title>
+    <link rel="stylesheet" href="master.css" type="text/css" />
+    <title>{{book_title}}</title>
   </head>
   <body>
-    <h1>{{title}}</h1>
-    <hr/>
-    <div>
-      {{toc}}
-    </div>
-    <div>
-      {% for section in sections %}
-        <li>
+    <div class="content">
+      <h1>{{book_title}}</h1>
+      <hr/>
+      <div>
+        {{toc}}
+      </div>
+      <div id="toc">
+        <ul>
+        {% for section in sections %}
+          <li>
           <h2><a href="{{ section.link }}">{{section.title}}</a></h2>
-          {% if section.sub %}
-          <ul>
-            {% for sub in section.sub %}
-            <li><a href="{{ sub.link }}">{{ sub.title }}</a></li>
-            {% endfor %}
-          </ul>
-          {% endif %}
-        </li>
-      {% endfor %}
+            {% if section.sub %}
+            <ul>
+              {% for sub in section.sub %}
+              <li><a href="{{ sub.link }}">{{ sub.title }}</a></li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </li>
+        {% endfor %}
+        </ul>
+      </div>
     </div>
     <hr/>
     <a href="book.mobi">Mobi</a>

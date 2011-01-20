@@ -1,7 +1,6 @@
 To-Do List
 =============
 
-* multi-page site
 * custom site layouts
 * auto-links to pdf/epub/mobi in site
 * custom/alternate themes (stylesheets)
@@ -9,7 +8,10 @@ To-Do List
 * book cover (w/template)
 * github pages publishing
 * checking for proper tools
+* book search
 * math formula
+* generate different languages from branches/tags (site, epub, mobi)
+* docbook import / direct from docbook
 
 * workflow
   - review / copy editing
