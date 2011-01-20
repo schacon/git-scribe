@@ -1,0 +1,50 @@
+<html>
+  <head>
+    <title>Page {{title}}</title>
+  </head>
+
+  <body>
+    <table width="100%">
+      <tr><td width="33%" align="left">
+        {% if prev %}
+         <a href="{{prev.link}}">Prev</a><br/>
+         {{prev.title}}
+        {% endif %}
+      </td><td width="33%" align="center">
+        {% if prev %}
+         <a href="{{home.link}}">Home</a><br/>
+        {% endif %}
+      </td><td width="33%" align="right">
+        {% if next %}
+          <a href="{{next.link}}">Next</a><br/>
+          {{next.title}}
+        {% endif %}
+      </td></tr>
+    </table>
+
+    <hr/>
+
+    {{content}}
+
+    <hr/>
+
+    <table width="100%">
+      <tr><td width="33%" align="left">
+        {% if prev %}
+         <a href="{{prev.link}}">Prev</a><br/>
+         {{prev.title}}
+        {% endif %}
+      </td><td width="33%" align="center">
+        {% if prev %}
+         <a href="{{home.link}}">Home</a><br/>
+        {% endif %}
+      </td><td width="33%" align="right">
+        {% if next %}
+          <a href="{{next.link}}">Next</a><br/>
+          {{next.title}}
+        {% endif %}
+      </td></tr>
+    </table>
+
+  </body>
+</html>

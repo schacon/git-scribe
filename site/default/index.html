@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <hr/>
+    <div>
+      {{toc}}
+    </div>
+    <div>
+      {% for section in sections %}
+        <li>
+          <h2><a href="{{ section.link }}">{{section.title}}</a></h2>
+          {% if section.sub %}
+          <ul>
+            {% for sub in section.sub %}
+            <li><a href="{{ sub.link }}">{{ sub.title }}</a></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </div>
+    <hr/>
+    <a href="book.mobi">Mobi</a>
+    <a href="book.epub">Epub</a>
+    <a href="book.pdf">PDF</a>
+  </body>
+</html>

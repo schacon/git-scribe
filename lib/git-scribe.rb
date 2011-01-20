@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'nokogiri'
+require 'liquid'
 
 require 'fileutils'
 require 'pp'
@@ -105,7 +106,7 @@ class GitScribe
   def do_html
     puts "GENERATING HTML"
     # TODO: look for custom stylesheets
-    puts `#{a2x_wss('xhtml')} -v #{BOOK_FILE}`
+    #puts `#{a2x_wss('xhtml')} -v #{BOOK_FILE}`
     styledir = File.expand_path(File.join(Dir.pwd, 'stylesheets'))
     puts cmd = "asciidoc -a stylesdir=#{styledir} -a theme=handbookish #{BOOK_FILE}"
     `#{cmd}`
@@ -117,29 +118,121 @@ class GitScribe
     puts "GENERATING SITE"
     # TODO: check if html was already done
     puts `asciidoc -b docbook #{BOOK_FILE}`
-    xsldir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'xsl'))
-    puts "xsltproc --stringparam html.stylesheet stylesheets/handbookish.css --nonet #{xsldir}/chunked.xsl book.xml"
-    `xsltproc --stringparam html.stylesheet stylesheets/handbookish.css --nonet #{xsldir}/chunked.xsl book.xml`
-    #source = File.read('book.html')
-    #html = Nokogiri::XML.parse(source)
-    # TODO: split html file into chunked site, apply templates
+    xsldir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'docbook-xsl', 'xhtml'))
+    `xsltproc --stringparam html.stylesheet stylesheets/handbookish.css --nonet #{xsldir}/chunk.xsl book.xml`
+
+    source = File.read('index.html')
+    html = Nokogiri::XML.parse(source)
+
+    sections = []
+    c = -1
+
+    # each chapter
+    html.css('.toc > dl').each do |section|
+      section.children.each do |item|
+        if item.name == 'dt' # section
+          c += 1
+          sections[c] ||= {}
+          link = item.css('a').first
+          sections[c]['title'] = title = link.text
+          sections[c]['href'] = href = link['href']
+          clean_title = title.downcase.gsub(/[^a-z0-9\-_]+/, '_') + '.html'
+          sections[c]['link'] = clean_title
+          if href[0, 10] == 'index.html'
+            sections[c]['link'] = 'title.html'
+          end
+          sections[c]['sub'] = []
+        end
+        if item.name == 'dd' # subsection
+          item.css('dt').each do |sub|
+            link = item.css('a').first
+            data = {}
+            data['title'] = title = link.text
+            data['href'] = href = link['href']
+            data['link'] = sections[c]['link'] + '#' + href.split('#').last
+            sections[c]['sub'] << data
+          end
+        end
+      end
+      puts
+    end
+
+    book_title = html.css('head > title').text
+    content = html.css('div.section').first.to_html
+    header = html.css('div.navheader').to_html
+    footer = html.css('div.navfooter').to_html
+
+    template_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'site', 'default'))
+    Liquid::Template.file_system = Liquid::LocalFileSystem.new(template_dir)
+    index_template = Liquid::Template.parse(File.read(File.join(template_dir, 'index.html')))
+    page_template = Liquid::Template.parse(File.read(File.join(template_dir, 'page.html')))
+
+    # write the index page
+    File.open('index.html', 'w+') do |f|
+      data = { 
+        'title' => book_title,
+        'sections' => sections
+      }
+      f.puts index_template.render( data )
+    end
+
+    # write the title page
+    File.open('title.html', 'w+') do |f|
+      data = { 
+        'title' => sections.first['title'],
+        'sub' => sections.first['sub'],
+        'prev' => {'link' => 'index.html', 'title' => "Main"},
+        'home' => {'link' => 'index.html', 'title' => "Home"},
+        'next' => sections[1],
+        'content' => content
+      }
+      f.puts page_template.render( data )
+    end
+
+    # write the other pages
+    sections.each_with_index do |section, i|
+
+      if i > 0 # skip title page
+        source = File.read(section['href'])
+        puts source
+
+        html = Nokogiri::XML.parse(source)
+
+        content = html.css('div.section').first.to_html
+
+        File.open(section['link'], 'w+') do |f|
+          next_section = nil
+          if i <= sections.size
+            next_section = sections[i+1]
+          end
+          data = { 
+            'title' => section['title'],
+            'sub' => section['sub'],
+            'prev' => sections[i-1],
+            'home' => {'link' => 'index.html', 'title' => "Home"},
+            'next' => next_section,
+            'content' => content
+          }
+          f.puts page_template.render( data )
+        end
+        File.unlink(section['href'])
+
+        puts i
+        puts section['title']
+        puts section['href']
+        puts section['link']
+        puts
+      end
+
+      #File.unlink
+    end
   end
 
 
   # create a new file by concatenating all the ones we find
   def gather_and_process
-    files = Dir.glob("book/**/*.asciidoc")
-    File.open("output/#{BOOK_FILE}", 'w+') do |f|
-      files.each do |file|
-        f.puts File.read(file)
-      end
-    end
-    files = Dir.glob("book/image/**/*")
-    FileUtils.cp_r(files, 'output/resources/')
-
-    files = Dir.glob("book/include/**/*")
-    FileUtils.cp_r(files, 'output/')
-    pp files
+    files = Dir.glob("book/*")
+    FileUtils.cp_r files, 'output'
   end
 
   # DISPLAY HELPER FUNCTIONS #
