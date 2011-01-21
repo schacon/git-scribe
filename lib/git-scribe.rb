@@ -79,7 +79,7 @@ class GitScribe
   end
 
   def a2x(type)
-    "a2x -f #{type} -d book -r resources"
+    "a2x -f #{type} -d book "
   end
 
   def a2x_wss(type)
@@ -98,7 +98,7 @@ class GitScribe
   def do_epub
     puts "GENERATING EPUB"
     # TODO: look for custom stylesheets
-    `#{a2x_wss('epub')} --epubcheck #{BOOK_FILE}`
+    `#{a2x_wss('epub')} -v #{BOOK_FILE}`
     puts 'exit status', $?.exitstatus
     'book.epub'
   end

@@ -2,8 +2,9 @@ To-Do List
 =============
 
 * custom site layouts
-* auto-links to pdf/epub/mobi in site
 * custom/alternate themes (stylesheets)
+* mobi generation
+* auto-links to pdf/epub/mobi in site
 * cover page for site (author, about, etc)
 * book cover (w/template)
 * github pages publishing
