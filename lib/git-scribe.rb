@@ -89,10 +89,28 @@ class GitScribe
   def do_pdf
     puts "GENERATING PDF"
     # TODO: syntax highlighting (fop?)
-    `#{a2x('pdf')} --dblatex-opts "-P latex.output.revhistory=0" #{BOOK_FILE}`
+    puts `asciidoc -b docbook #{BOOK_FILE}`
+    strparams = {'callout.graphics' => 0,
+                 'navig.graphics' => 0,
+                 'admon.textlabel' => 1,
+                 'admon.graphics' => 0}
+    param = strparams.map { |k, v| "--stringparam #{k} #{v}" }.join(' ')
+    puts cmd = "xsltproc  --nonet #{param} --output #{local('book.fo')} #{base('docbook-xsl/fo.xsl')} #{local('book.xml')}"
+    puts `#{cmd}`
+    cmd = "fop -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
+    puts `#{cmd}`
+    #puts `#{a2x('pdf')} -v --fop #{BOOK_FILE}`
     if $?.exitstatus == 0
       'book.pdf'
     end
+  end
+
+  def local(file)
+    File.expand_path(File.join(Dir.pwd, file))
+  end
+
+  def base(file)
+    File.expand_path(File.join(File.dirname(__FILE__), '..', '..', file))
   end
 
   def do_epub
@@ -107,7 +125,7 @@ class GitScribe
     puts "GENERATING HTML"
     # TODO: look for custom stylesheets
     #puts `#{a2x_wss('xhtml')} -v #{BOOK_FILE}`
-    styledir = File.expand_path(File.join(Dir.pwd, 'stylesheets'))
+    styledir = local('stylesheets')
     puts cmd = "asciidoc -a stylesdir=#{styledir} -a theme=handbookish #{BOOK_FILE}"
     `#{cmd}`
     puts 'exit status', $?.exitstatus
@@ -118,7 +136,7 @@ class GitScribe
     puts "GENERATING SITE"
     # TODO: check if html was already done
     puts `asciidoc -b docbook #{BOOK_FILE}`
-    xsldir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'docbook-xsl', 'xhtml'))
+    xsldir = base('docbook-xsl/xhtml')
     `xsltproc --stringparam html.stylesheet stylesheets/handbookish.css --nonet #{xsldir}/chunk.xsl book.xml`
 
     source = File.read('index.html')
