@@ -98,26 +98,29 @@ Layout
 
 The layout that the `git scribe init` produces looks like this:
 
-    * book/
-    |`--* book.asc
-    |`--* 01_first_chapter.asc
-    |`--* 02_second_chapter.asc
-    |`--* 99_backmatter.asc
-    |`--* image/
-    |    `--* 01.01-example-image.png
-    |    `--* 01.02-another-image.png
-    |    `--* 02.01-an-image.png
-    |`--* include/
-    |    `--* 02.01-code.c
-    * style/
-    |`--* style.css
-    * site/
-    |`--* layout.html
-    * test/
-    |`--* 01_test.rb
-    * LICENSE.txt
-    * README.asciidoc
-    * .gitscribe
+[source]
+----
+* book/
+|`--* book.asc
+|`--* 01_first_chapter.asc
+|`--* 02_second_chapter.asc
+|`--* 99_backmatter.asc
+|`--* image/
+|    `--* 01.01-example-image.png
+|    `--* 01.02-another-image.png
+|    `--* 02.01-an-image.png
+|`--* include/
+|    `--* 02.01-code.c
+* style/
+|`--* style.css
+* site/
+|`--* layout.html
+* test/
+|`--* 01_test.rb
+* LICENSE.txt
+* README.asciidoc
+* .gitscribe
+----
 
 Not all of those files would be generated (like the test files and the site files which are overrides for the site templates), but examples would and it would give a usable starting point for new authorship.  This example would be a valid and somewhat complex layout.
 
