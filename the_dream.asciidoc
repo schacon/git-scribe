@@ -1,12 +1,12 @@
 The Dream
-===================
+=========
 
 This is where I'm documenting basically what I want the README to eventually look like.  This is sort of my Document Driven Development file.  I'm trying to envision what the git-scribe project should look like as I write the tool.  I didn't want it to be in the readme yet so as not to confuse people.  All the commands are just ideas and what not.  If you have an idea of how you would like things to look, add them here and send a pull request.
 
 I want to get the full workflows worked out here (with technical details) before I even try to implement them.
 
 Start a Book
-===================
+============
 
     $ git scribe init (--type=[code,math]) (--license=[public,cc]) (--lang=en) [project]
 
@@ -16,7 +16,7 @@ Also records version of scribe workflow we're using into .gitscribe file.
 * shows cheat-sheet of how to use grep, tag, diff (--word)
 
 Work on a Book
-===================
+==============
 
     $ git scribe check
 
@@ -28,7 +28,7 @@ Register yourself and your role in this book.
   kept in .git/scribe
 
 To Do List
-===================
+==========
 
     $ git scribe todo
 
@@ -37,12 +37,12 @@ To Do List
   most of that is kept in .gitscribe
 
 Writing
-===================
+=======
 
     $ git scribe new chapter
 
 Editing
-===================
+=======
 
     $ git scribe review
 
@@ -71,7 +71,7 @@ See which translations are what percent complete.
 - get list of translators for each translation
 
 Editions
-===================
+========
 This is meant to be done infrequently - like an edition of a book or a major version of a framework that is being documented.  Publishing editions too often makes work difficult on translators, so be prudent.
 
     $ git scribe --tool-version=1.7 publish [major|minor]
@@ -79,7 +79,7 @@ This is meant to be done infrequently - like an edition of a book or a major ver
 Tags the edition with the next major or minor number, generates a branch for maintainance for this edition.
 
 Generate Media
-===================
+==============
 
     $ git scribe gen (--lang=de) (--edition=1.0) [site,pdf,mobi,epub]
 
@@ -88,13 +88,13 @@ OR
     $ git push origin
 
 Sell
-===================
+====
 
     $ git scribe sell --price=8.00 [--lang=de] (ibooks,kindle,nook,lulu)
 
 
 Layout
-===================
+======
 
 The layout that the `git scribe init` produces looks like this:
 
@@ -118,6 +118,6 @@ The layout that the `git scribe init` produces looks like this:
     * LICENSE.txt
     * README.asciidoc
     * .gitscribe
-  
+
 Not all of those files would be generated (like the test files and the site files which are overrides for the site templates), but examples would and it would give a usable starting point for new authorship.  This example would be a valid and somewhat complex layout.
 
