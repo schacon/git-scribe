@@ -7,6 +7,8 @@ require 'pp'
 
 class GitScribe
 
+  SCRIBE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+
   def initialize(args)
     @command = args.shift
     @args = args
@@ -73,7 +75,9 @@ class GitScribe
     Dir.mkdir('output') rescue nil
     Dir.chdir('output') do
       Dir.mkdir('stylesheets') rescue nil
-      from_stdir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'stylesheets'))
+      puts SCRIBE_ROOT
+      from_stdir = File.join(SCRIBE_ROOT, 'stylesheets')
+      pp from_stdir
       FileUtils.cp_r from_stdir, '.'
     end
   end
@@ -110,7 +114,7 @@ class GitScribe
   end
 
   def base(file)
-    File.expand_path(File.join(File.dirname(__FILE__), '..', '..', file))
+    File.join(SCRIBE_ROOT, file)
   end
 
   def do_epub
@@ -187,7 +191,7 @@ class GitScribe
       content.gsub!(s['href'], s['link'])
     end
 
-    template_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'site', 'default'))
+    template_dir = File.join(SCRIBE_ROOT, 'site', 'default')
 
     # copy the template files in
     files = Dir.glob(template_dir + '/*')
