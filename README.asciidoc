@@ -1,130 +1,59 @@
 Git Scribe
-===================
+==========
 
 The git-scribe tool is a simple command line toolset to help you use Git, GitHub and Asciidoc
-to write e-books.  This provides tools for setting up the structure, collaborating with co-authors,
-doing technical and copy-editing, handling translations, taking errata, as well as publishing 
-online, pdf, mobi (Kindle) and epub (iBooks, Nook) versions.
+to write e-books.  This provides tools for setting up the structure, collaborating with co-authors, doing technical and copy-editing, handling translations, taking errata, as well as publishing online, pdf, mobi (Kindle) and epub (iBooks, Nook) versions.
 
-Easy: Syntax-Highlighted Code, Formula, Diagrams
-Online: Comment, Search, Permalinks
-Sell: Kindle, iBooks, Lulu, Pledgie(?)
+The project is targeted for writing books of any length, but should also be usable for articles and stuff too, though for a while you'll have to just do it as a really short book.
 
-https://github.com/oreilly/couchdb-guide
+Features
+========
 
-A good cheat sheet: http://powerman.name/doc/asciidoc#_text
+Eventually, these are the feature goals for the project:
 
-Start a Book
-===================
+* Easy: Syntax-Highlighted Code, Formula, Diagrams
+* Site Generation: Comment, Search, Permalinks
+* Pegging versions of the book to versions of the tool it documents
+* Technical and Copy editing workflow tools
+* Translation workflow tools
+* Selling (possibly): Kindle, iBooks, Lulu, Pledgie(?)
 
-    $ git scribe init (--type=[code,math]) (--license=[public,cc]) (--lang=en) [project]
+The idea is that you use the tool to generate a known structure, write in asciidoc and let the tool handle everything else for you.  I want authors to be able to focus on writing and not have to worry about anything else.
 
-Generates a skeleton, license file and readmes with instructions for authors and contributors.
-Also records version of scribe workflow we're using into .gitscribe file.
+A good AsciiDoc cheat sheet: http://powerman.name/doc/asciidoc#_text
 
-* shows cheat-sheet of how to use grep, tag, diff (--word)
+Disclaimer
+==========
 
-Work on a Book
-===================
+This tool is a work in progress.  At the 1.0 release, this file will be totally up to date, but for now I may have documented some stuff that doesn't yet work.  Contact me personally if you are interested in working on it.
 
-    $ git scribe check
+Installing
+==========
 
-Run checks to make sure you have all the tools you need and your system can do stuff.
+You can install git-scribe via RubyGems.
 
-    $ git scribe register (--role=[author,reviewer,editor,translator])
+    $ gem install git-scribe
 
-Register yourself and your role in this book.
-  kept in .git/scribe
+For local generation (evenutally pushing to GitHub will handle gen for you), it depends on a couple things like:
 
-To Do List
-===================
+* Ruby
+* asciidoc, a2x
+* xslt stuff
+* FOP for PDF gen
 
-    $ git scribe todo
+Usage
+=====
 
-* lists boilerplate you still haven't filled out 
-  (title, author, description, chapter, cover, bio, biblio, price, license, etc)
-  most of that is kept in .gitscribe
+Initialize a new book with `init`.
 
-Writing
-===================
+    $ git scribe init
 
-    $ git scribe new chapter
+This will set up the outline for your book.  All the book content goes into the 'book' subdirectory with 'book.asc' as the starting point.  If you want to split the writing up into multiple files you can simply include them in the book.asc file.
 
-Editing
-===================
+    $ git scribe gen [site|html|pdf|epub|mobi|all]
 
-    $ git scribe review
+Roadmap
+=======
 
-TODO: address technical reviewing and copy-editing
+See the_dream.asc for what this file should look like eventually.
 
-Translating - Translator
-========================
-
-    $ git scribe trans start (--edition=1.1) de
-
-Sets up pre-commit hook to check that commit message is formatted correctly, copies over main language to 'de'
-http://en.wikipedia.org/wiki/IETF_language_tag
-
-    $ git scribe trans changes (--since=2010-01-01)
-
-    $ git scribe trans done SHA
-
-Translating - Maintainer
-========================
-
-    $ git scribe trans complete
-
-See which translations are what percent complete.
-
-- get list of translators for each translation
-
-Editions
-===================
-
-This is meant to be done infrequently - like an edition of a book or a major version of a framework that is
-being documented.  Publishing editions too often makes work difficult on translators, so be prudent.
-
-    $ git scribe publish 1.1
-
-Tags the edition, copies the source into editions/1.1/en so translators can work from that point.
-
-Generate Media
-===================
-
-    $ git scribe gen (--lang=de) (--edition=1.0) [site,pdf,mobi,epub]
-
-OR
-
-    $ git push origin
-
-Sell
-===================
-
-    $ git scribe sell --price=8.00 [--lang=de] (ibooks,kindle,nook,lulu)
-
-
-Layout
-===================
-
-The layout that the `git scribe init` produces looks like this:
-
-* book/
-|`--* 00_frontmatter.asciidoc
-|`--* 01_first_chapter.asciidoc
-|`--* 02_second_chapter.asciidoc
-|`--* 99_backmatter.asciidoc
-|`--* image/
-|    `--* 01.01-example-image.png
-|    `--* 01.02-another-image.png
-|    `--* 02.01-an-image.png
-|`--* include/
-|    `--* 02.01-code.c
-* style/
-|`--* style.css
-* site/
-|`--* layout.html
-* test/
-|`--* 01_test.rb
-* LICENSE.txt
-* README.asciidoc
-* .gitscribe
