@@ -44,13 +44,17 @@ For local generation (evenutally pushing to GitHub will handle gen for you), it 
 Usage
 =====
 
-Initialize a new book with `init` (not yet completed).
+Initialize a new book with `init`:
 
     $ git scribe init
 
 This will set up the outline for your book.  All the book content goes into the 'book' subdirectory with 'book.asc' as the starting point.  If you want to split the writing up into multiple files you can simply include them in the book.asc file.
 
+Then you can generate your book content with the 'git scribe gen' command:
+
     $ git scribe gen [site|html|pdf|epub|mobi|all]
+
+Eventually, simply pushing to GitHub will take care of this for you.
 
 Roadmap
 =======
