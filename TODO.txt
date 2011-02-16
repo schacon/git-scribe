@@ -4,7 +4,6 @@ To-Do List
 * custom site layouts
 * custom/alternate themes (stylesheets)
 * mobi generation
-* auto-links to pdf/epub/mobi in site
 * cover page for site (author, about, etc)
 * book cover (w/template)
 * github pages publishing
@@ -12,16 +11,19 @@ To-Do List
 * book search
 * math formula
 * generate different languages from branches/tags (site, epub, mobi)
-* docbook import / direct from docbook
+
+* use options library
 
 * workflow
   - review / copy editing
   - translation
   - edition release
+  - maint branches (pegging to software revs)
 
 * amazon/ibooks/lulu integration
 
 * site comments
 * github-side generation
 * external auto-publishing / monetization (?)
+* docbook import / direct from docbook
 
