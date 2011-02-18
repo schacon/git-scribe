@@ -3,4 +3,4 @@ $LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
 
 require 'git-scribe'
 
-GitScribe.start(ARGV)
+GitScribe.start

@@ -1,21 +1,50 @@
 require 'rubygems'
 require 'nokogiri'
 require 'liquid'
+require 'subcommand'
 
 require 'fileutils'
 require 'pp'
 
 class GitScribe
 
+  include Subcommands
+
+  BOOK_FILE = 'book.asc'
+  OUTPUT_TYPES = ['pdf', 'epub', 'mobi', 'html', 'site']
   SCRIBE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 
-  def initialize(args)
-    @command = args.shift
-    @args = args
+  def initialize
+
+    @options = {}
+    global_options do |opts|
+      opts.banner = "Usage: #{$0} [options] [subcommand [options]]"
+      opts.description = "git-scribe helps you write books with the power of Git"
+      opts.separator ""
+      opts.separator "Global options are:"
+      opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+        @options[:verbose] = v
+      end
+    end
+
+    command :init do |opts|
+      opts.banner = "Usage: git scribe init (directory)"
+      opts.description = "initialize a new book layout"
+      opts.on("-l", "--lang", "choose a default language (en)") do |v|
+        @options[:lang] = lang || 'en'
+      end
+    end
+
+    command :gen do |opts|
+      opts.banner = "Usage: git scribe gen [options]"
+      opts.description = "generate digital formats"
+    end
+
+    @command = opt_parse
   end
 
-  def self.start(args)
-    GitScribe.new(args).run
+  def self.start
+    GitScribe.new.run
   end
 
   def run
@@ -28,14 +57,14 @@ class GitScribe
 
   ## COMMANDS ##
  
-  def help
-    puts "No command: #{@command}"
-    puts "TODO: tons of help"
+
+  def die(message)
+    raise message
   end
 
   # start a new scribe directory with skeleton structure
   def init
-    name = @args.shift
+    name = ARGV.shift
     die("needs a directory name") if !name
     die("directory already exists") if File.exists?(name)
 
@@ -79,14 +108,9 @@ class GitScribe
     `#{command} 2>&1`
     $?.exitstatus == 0
   end
-
-  BOOK_FILE = 'book.asc'
-
-  OUTPUT_TYPES = ['pdf', 'epub', 'mobi', 'html', 'site']
-
   # generate the new media
   def gen
-    type = @args.shift || 'all'
+    type = ARGV.shift || 'all'
     prepare_output_dir
 
     gather_and_process
@@ -104,8 +128,7 @@ class GitScribe
         end
       end
       # clean up
-      # `rm #{BOOK_FILE}`
-      # TODO: open media (?)
+      `rm #{BOOK_FILE}`
     end
   end
 

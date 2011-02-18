@@ -2,7 +2,7 @@ $LOAD_PATH.unshift 'lib'
 
 Gem::Specification.new do |s|
   s.name              = "git-scribe"
-  s.version           = "0.0.1"
+  s.version           = "0.0.3"
   s.date              = Time.now.strftime('%Y-%m-%d')
   s.summary           = "git-scribe is an authors toolkit for writing and publishing books"
   s.homepage          = "http://github.com/schacon/git-scribe"
