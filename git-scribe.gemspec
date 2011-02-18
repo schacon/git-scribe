@@ -2,7 +2,7 @@ $LOAD_PATH.unshift 'lib'
 
 Gem::Specification.new do |s|
   s.name              = "git-scribe"
-  s.version           = "0.0.3"
+  s.version           = "0.0.4"
   s.date              = Time.now.strftime('%Y-%m-%d')
   s.summary           = "git-scribe is an authors toolkit for writing and publishing books"
   s.homepage          = "http://github.com/schacon/git-scribe"
@@ -13,6 +13,11 @@ Gem::Specification.new do |s|
   s.files             = %w( LICENSE README.asciidoc )
   s.files            += Dir.glob("lib/**/*")
   s.files            += Dir.glob("bin/**/*")
+  s.files            += Dir.glob("site/**/*")
+  s.files            += Dir.glob("stylesheets/**/*")
+  s.files            += Dir.glob("template/**/*")
+  s.files            += Dir.glob("example/**/*")
+  s.files            += Dir.glob("docbook-xsl/**/*")
 
   s.executables       = %w( git-scribe )
 
