@@ -8,7 +8,9 @@ class GitScribe
 
       info "inititalizing #{name}"
       from_stdir = File.join(SCRIBE_ROOT, 'template')
+      ign = Dir.glob(from_stdir + '/.[a-z]*')
       FileUtils.cp_r from_stdir, name
+      FileUtils.cp_r ign, name
     end
   end
 end
