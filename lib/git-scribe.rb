@@ -16,6 +16,7 @@ class GitScribe
   include Generate
 
   attr_accessor :subcommand, :args, :options
+  attr_reader :info
 
   BOOK_FILE = 'book.asc'
   OUTPUT_TYPES = ['pdf', 'epub', 'mobi', 'html', 'site']
@@ -53,7 +54,8 @@ class GitScribe
 
   # eventually we'll want to log this or have it retrievable elsehow
   def info(message)
-    puts message
+    @info ||= []
+    @info << message
   end
 
 end

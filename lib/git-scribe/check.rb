@@ -1,34 +1,55 @@
 class GitScribe
   module Check
     # check that we have everything needed
-    def check
+    def check(args = [])
+      status = {}
+
+      # check for git
+      if !check_can_run('git --version')
+        info "git is not present, please install it for anything to work"
+        status[:git] = true
+      else
+        info "git      - ok"
+        status[:git] = false
+      end
+
       # check for asciidoc
       if !check_can_run('asciidoc')
-        puts "asciidoc is not present, please install it for anything to work"
+        info "asciidoc is not present, please install it for anything to work"
+        status[:asciidoc] = true
       else
-        puts "asciidoc - ok"
+        info "asciidoc - ok"
+        status[:asciidoc] = false
       end
 
       # check for xsltproc
       if !check_can_run('xsltproc --version')
-        puts "xsltproc is not present, please install it for html generation"
+        info "xsltproc is not present, please install it for html generation"
+        status[:xsltproc] = true
       else
-        puts "xsltproc - ok"
+        info "xsltproc - ok"
+        status[:xsltproc] = false
       end
 
       # check for a2x - should be installed with asciidoc, but you never know
       if !check_can_run('a2x')
-        puts "a2x is not present, please install it for epub generation"
+        info "a2x is not present, please install it for epub generation"
+        status[:a2x] = true
       else
-        puts "a2x - ok"
+        info "a2x      - ok"
+        status[:a2x] = false
       end
 
       # check for fop
       if !check_can_run('fop -version')
-        puts "fop is not present, please install for PDF generation"
+        info "fop is not present, please install for PDF generation"
+        status[:fop] = true
       else
-        puts "fop - ok"
+        info "fop      - ok"
+        status[:fop] = false
       end
+
+      status
     end
 
     def check_can_run(command)

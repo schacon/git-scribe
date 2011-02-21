@@ -55,6 +55,11 @@ class GitScribe
         opts.description = "generate digital formats"
       end
 
+      command :check do |opts|
+        opts.banner = "Usage: git scribe check"
+        opts.description = "checks for system requirements for doc generation"
+      end
+
       @subcommand = opt_parse
       @args = ARGV
     end
