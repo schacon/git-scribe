@@ -2,5 +2,6 @@
 $LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
 
 require 'git-scribe'
+require 'git-scribe/cli'
 
-GitScribe.start
+GitScribe.new.run
