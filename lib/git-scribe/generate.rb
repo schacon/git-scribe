@@ -9,18 +9,20 @@ class GitScribe
 
       types = type == 'all' ? OUTPUT_TYPES : [type]
 
+      ret = false
       output = []
       Dir.chdir("output") do
         types.each do |out_type|
           call = 'do_' + out_type
           if self.respond_to? call
-            self.send call
+            ret = self.send call
           else
-            puts "NOT A THING: #{call}"
+            die "NOT A THING: #{call}"
           end
         end
         # clean up
         `rm #{BOOK_FILE}`
+        ret
       end
     end
 
@@ -28,9 +30,7 @@ class GitScribe
       Dir.mkdir('output') rescue nil
       Dir.chdir('output') do
         Dir.mkdir('stylesheets') rescue nil
-        puts SCRIBE_ROOT
         from_stdir = File.join(SCRIBE_ROOT, 'stylesheets')
-        pp from_stdir
         FileUtils.cp_r from_stdir, '.'
       end
     end
@@ -44,18 +44,18 @@ class GitScribe
     end
 
     def do_pdf
-      puts "GENERATING PDF"
+      info "GENERATING PDF"
       # TODO: syntax highlighting (fop?)
-      puts `asciidoc -b docbook #{BOOK_FILE}`
+      ex("asciidoc -b docbook #{BOOK_FILE}")
       strparams = {'callout.graphics' => 0,
                    'navig.graphics' => 0,
                    'admon.textlabel' => 1,
                    'admon.graphics' => 0}
       param = strparams.map { |k, v| "--stringparam #{k} #{v}" }.join(' ')
-      puts cmd = "xsltproc  --nonet #{param} --output #{local('book.fo')} #{base('docbook-xsl/fo.xsl')} #{local('book.xml')}"
-      puts `#{cmd}`
+      cmd = "xsltproc  --nonet #{param} --output #{local('book.fo')} #{base('docbook-xsl/fo.xsl')} #{local('book.xml')}"
+      ex(cmd)
       cmd = "fop -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
-      puts `#{cmd}`
+      ex(cmd)
       #puts `#{a2x('pdf')} -v --fop #{BOOK_FILE}`
       if $?.exitstatus == 0
         'book.pdf'
@@ -63,30 +63,30 @@ class GitScribe
     end
 
     def do_epub
-      puts "GENERATING EPUB"
+      info "GENERATING EPUB"
       # TODO: look for custom stylesheets
-      `#{a2x_wss('epub')} -v #{BOOK_FILE}`
-      puts 'exit status', $?.exitstatus
-      'book.epub'
+      cmd = "#{a2x_wss('epub')} -v #{BOOK_FILE}"
+      if ex(cmd)
+        'book.epub'
+      end
     end
 
     def do_html
-      puts "GENERATING HTML"
+      info "GENERATING HTML"
       # TODO: look for custom stylesheets
       #puts `#{a2x_wss('xhtml')} -v #{BOOK_FILE}`
       styledir = local('stylesheets')
-      puts cmd = "asciidoc -a stylesdir=#{styledir} -a theme=handbookish #{BOOK_FILE}"
-      `#{cmd}`
-      puts 'exit status', $?.exitstatus
+      cmd = "asciidoc -a stylesdir=#{styledir} -a theme=handbookish #{BOOK_FILE}"
+      ex(cmd)
       'book.html'
     end
 
     def do_site
-      puts "GENERATING SITE"
+      info "GENERATING SITE"
       # TODO: check if html was already done
-      puts `asciidoc -b docbook #{BOOK_FILE}`
+      ex("asciidoc -b docbook #{BOOK_FILE}")
       xsldir = base('docbook-xsl/xhtml')
-      `xsltproc --stringparam html.stylesheet stylesheets/handbookish.css --nonet #{xsldir}/chunk.xsl book.xml`
+      ex("xsltproc --stringparam html.stylesheet stylesheets/handbookish.css --nonet #{xsldir}/chunk.xsl book.xml")
 
       source = File.read('index.html')
       html = Nokogiri::HTML.parse(source, nil, 'utf-8')
@@ -121,17 +121,13 @@ class GitScribe
             end
           end
         end
-        puts
       end
-
-      pp sections
 
       book_title = html.css('head > title').text
       content = html.css('body > div')[1]
       content.css('.toc').first.remove
       content = content.inner_html
 
-      puts content 
       sections.each do |s|
         content.gsub!(s['href'], s['link'])
       end
@@ -199,21 +195,27 @@ class GitScribe
           end
           #File.unlink(section['href'])
 
-          puts i
-          puts section['title']
-          puts section['href']
-          puts section['link']
-          puts
+          info i
+          info section['title']
+          info section['href']
+          info section['link']
         end
 
         #File.unlink
       end
+      sections
     end
 
     # create a new file by concatenating all the ones we find
     def gather_and_process
       files = Dir.glob("book/*")
       FileUtils.cp_r files, 'output'
+    end
+
+    def ex(command)
+      out = `#{command} 2>&1`
+      info out
+      $?.exitstatus == 0
     end
 
   end
