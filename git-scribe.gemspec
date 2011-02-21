@@ -1,5 +1,12 @@
 $LOAD_PATH.unshift 'lib'
 
+files = `git ls-files`.
+  split("\n").
+  sort
+
+puts files
+
+  # piece file back together and write...
 Gem::Specification.new do |s|
   s.name              = "git-scribe"
   s.version           = "0.0.4"
@@ -10,14 +17,7 @@ Gem::Specification.new do |s|
   s.authors           = [ "Scott Chacon" ]
   s.has_rdoc          = false
 
-  s.files             = %w( LICENSE README.asciidoc )
-  s.files            += Dir.glob("lib/**/*")
-  s.files            += Dir.glob("bin/**/*")
-  s.files            += Dir.glob("site/**/*")
-  s.files            += Dir.glob("stylesheets/**/*")
-  s.files            += Dir.glob("template/**/*")
-  s.files            += Dir.glob("example/**/*")
-  s.files            += Dir.glob("docbook-xsl/**/*")
+  s.files             = files
 
   s.executables       = %w( git-scribe )
 
