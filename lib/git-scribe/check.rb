@@ -4,15 +4,6 @@ class GitScribe
     def check(args = [])
       status = {}
 
-      # check for git
-      if !check_can_run('git --version')
-        info "git is not present, please install it for anything to work"
-        status[:git] = true
-      else
-        info "git      - ok"
-        status[:git] = false
-      end
-
       # check for asciidoc
       if !check_can_run('asciidoc')
         info "asciidoc is not present, please install it for anything to work"
@@ -39,6 +30,16 @@ class GitScribe
         info "a2x      - ok"
         status[:a2x] = false
       end
+
+      # check for source-highlight
+      if !check_can_run('source-highlight --version')
+        info "source-highlight is not present, please install it for source code highlighting"
+        status[:highlight] = false
+      else
+        info "highlighting - ok"
+        status[:highlight] = true
+      end
+
 
       # check for fop
       if !check_can_run('fop -version')

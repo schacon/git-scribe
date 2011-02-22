@@ -71,6 +71,10 @@ class GitScribe
       end
     end
 
+    def do_mobi
+      info "GENERATING MOBI"
+    end
+
     def do_html
       info "GENERATING HTML"
       # TODO: look for custom stylesheets
