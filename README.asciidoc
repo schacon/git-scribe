@@ -18,7 +18,7 @@ Eventually, these are the feature goals for the project:
 * Translation workflow tools
 * Selling (possibly): Kindle, iBooks, Lulu, Pledgie(?)
 
-The idea is that you use the tool to generate a known structure, write in asciidoc and let the tool handle everything else for you.  I want authors to be able to focus on writing and not have to worry about anything else.
+The idea is that you use the tool to generate a known structure, write in asciidoc and let the tool handle everything else for you.  I want authors to be able to focus on writing and not have to worry about anything else (website, multiple format generation, etc).
 
 A good AsciiDoc cheat sheet: http://powerman.name/doc/asciidoc#_text
 
@@ -36,30 +36,41 @@ You can install git-scribe via RubyGems.
 
 For local generation (evenutally pushing to GitHub will handle gen for you), it depends on a couple things like:
 
+* Git
 * Ruby
-* asciidoc, a2x
-* xslt stuff
-* FOP for PDF gen
+* asciidoc, a2x (8.6.4)
+* xsltproc
+* source-highlight (3.1)
+* FOP (1.0) - for PDF generation
 
 Usage
 =====
+
+Check if you have everything installed properly for local generation with `check`:
+
+    $ git scribe check
+    asciidoc - ok
+    xsltproc - ok
+    a2x      - ok
+    highlighting - ok
+    fop      - ok
 
 Initialize a new book with `init`:
 
     $ git scribe init
 
-This will set up the outline for your book.  All the book content goes into the 'book' subdirectory with 'book.asc' as the starting point.  If you want to split the writing up into multiple files you can simply include them in the book.asc file.
+This will set up the outline for your book.  All the book content goes into the 'book' subdirectory with 'book.asc' as the starting point.  If you want to split the writing up into multiple files you can simply include them in the book.asc file.  The generated files have an example of this.
 
 Then you can generate your book content with the 'git scribe gen' command:
 
     $ git scribe gen [site|html|pdf|epub|mobi|all]
 
-Eventually, simply pushing to GitHub will take care of this for you.
+Eventually, simply pushing to GitHub will take care of this for you.  For now you can test this auto-generation from the site http://gitscribe.com.  Adding that URL as a post receive hook on your github project will make it try to auto-generate content on push.
 
 Roadmap
 =======
 
-See the_dream.asc for what this file should look like eventually.
+See SPEC.asciidoc for what this file should look like eventually.
 
 Contributing
 ============
