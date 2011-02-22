@@ -7,6 +7,6 @@ context "scribe check tests" do
 
   test "scribe can check for programs it needs" do
     status = @scribe.check
-    assert_equal status.size, 5
+    assert_equal status.size, 6
   end
 end

@@ -3,7 +3,6 @@ To-Do List
 
 * custom site layouts
 * custom/alternate themes (stylesheets)
-* mobi generation
 * cover page for site (author, about, etc)
 * book cover (w/template)
 * github pages publishing

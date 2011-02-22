@@ -50,6 +50,16 @@ class GitScribe
         status[:fop] = false
       end
 
+      # check for calibre
+      if !check_can_run('ebook-convert --version')
+        info "calibre is not present, please install for mobi generation"
+        status[:calibre] = true
+      else
+        info "calibre  - ok"
+        status[:calibre] = false
+      end
+
+
       status
     end
 

@@ -2,6 +2,8 @@ class GitScribe
   module Generate
     # generate the new media
     def gen(args = [])
+      @done = {}  # what we've generated already
+
       type = first_arg(args) || 'all'
       prepare_output_dir
 
@@ -72,17 +74,29 @@ class GitScribe
     end
 
     def do_mobi
+      do_html
       info "GENERATING MOBI"
+      # --cover 'cover.png'
+      # --authors 'Author Name'
+      # --comments "licensed under CC"
+      # --language 'en'
+      cmd = "ebook-convert book.html book.mobi --level1-toc '//h:h1' --level2-toc '//h:h2' --level3-toc '//h:h3'"
+      if ex(cmd)
+        'book.mobi'
+      end
     end
 
     def do_html
+      return true if @done['html']
       info "GENERATING HTML"
       # TODO: look for custom stylesheets
       #puts `#{a2x_wss('xhtml')} -v #{BOOK_FILE}`
       styledir = local('stylesheets')
       cmd = "asciidoc -a stylesdir=#{styledir} -a theme=handbookish #{BOOK_FILE}"
-      ex(cmd)
-      'book.html'
+      if ex(cmd)
+        @done['html'] == true
+        'book.html'
+      end
     end
 
     def do_site

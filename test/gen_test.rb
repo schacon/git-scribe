@@ -64,10 +64,19 @@ context "scribe gen tests" do
     end
   end
 
-  xtest "scribe can generate docbook" do
+  test "scribe can generate a mobi" do
+    in_temp_dir do
+      @scribe.init('t')
+      Dir.chdir('t') do
+      data = @scribe.gen('mobi')
+        assert_equal data, 'book.mobi'
+        out = Dir.glob('output/**/*')
+        assert out.include? 'output/book.mobi'
+      end
+    end
   end
 
-  xtest "scribe can generate a mobi" do
+  xtest "scribe can generate docbook" do
   end
 
   xtest "scribe can generate all" do
