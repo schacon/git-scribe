@@ -9,7 +9,7 @@ puts files
   # piece file back together and write...
 Gem::Specification.new do |s|
   s.name              = "git-scribe"
-  s.version           = "0.0.7"
+  s.version           = "0.0.8"
   s.date              = Time.now.strftime('%Y-%m-%d')
   s.summary           = "git-scribe is an authors toolkit for writing and publishing books"
   s.homepage          = "http://github.com/schacon/git-scribe"
