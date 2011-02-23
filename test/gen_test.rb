@@ -76,7 +76,16 @@ context "scribe gen tests" do
     end
   end
 
-  xtest "scribe can generate docbook" do
+  test "scribe can generate docbook" do
+    in_temp_dir do
+      @scribe.init('t')
+      Dir.chdir('t') do
+      data = @scribe.gen('docbook')
+        assert_equal data, 'book.xml'
+        out = Dir.glob('output/**/*')
+        assert out.include? 'output/book.xml'
+      end
+    end
   end
 
   xtest "scribe can generate all" do

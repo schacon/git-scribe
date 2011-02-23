@@ -45,10 +45,19 @@ class GitScribe
       a2x(type) + " --stylesheet=stylesheets/handbookish.css"
     end
 
+    def do_docbook
+      return true if @done['docbook']
+      info "GENERATING DOCBOOK"
+      if ex("asciidoc -b docbook #{BOOK_FILE}")
+        @done['docbook'] = true
+        'book.xml'
+      end
+    end
+
     def do_pdf
       info "GENERATING PDF"
+      do_docbook
       # TODO: syntax highlighting (fop?)
-      ex("asciidoc -b docbook #{BOOK_FILE}")
       strparams = {'callout.graphics' => 0,
                    'navig.graphics' => 0,
                    'admon.textlabel' => 1,
@@ -58,7 +67,6 @@ class GitScribe
       ex(cmd)
       cmd = "fop -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
       ex(cmd)
-      #puts `#{a2x('pdf')} -v --fop #{BOOK_FILE}`
       if $?.exitstatus == 0
         'book.pdf'
       end
@@ -90,7 +98,6 @@ class GitScribe
       return true if @done['html']
       info "GENERATING HTML"
       # TODO: look for custom stylesheets
-      #puts `#{a2x_wss('xhtml')} -v #{BOOK_FILE}`
       styledir = local('stylesheets')
       cmd = "asciidoc -a stylesdir=#{styledir} -a theme=handbookish #{BOOK_FILE}"
       if ex(cmd)

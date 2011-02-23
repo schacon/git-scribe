@@ -19,7 +19,7 @@ class GitScribe
   attr_reader :info
 
   BOOK_FILE = 'book.asc'
-  OUTPUT_TYPES = ['pdf', 'epub', 'mobi', 'html', 'site']
+  OUTPUT_TYPES = ['docbook', 'html', 'pdf', 'epub', 'mobi', 'site']
   SCRIBE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 
   def initialize
