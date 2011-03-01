@@ -1,28 +1,15 @@
 To-Do List
 =============
 
-* git-init after git scribe init
-
-* custom site layouts
-* custom/alternate themes (stylesheets)
-* cover page for site (author, about, etc)
-* book cover (w/template)
-* generate hashes for generated assets and do not regenerate them unneccesarily
-
-* book search
-* math formula
-* generate different languages from branches/tags (site, epub, mobi)
-
 * workflow
   - review / copy editing
   - translation
   - edition release
   - maint branches (pegging to software revs)
 
-* amazon/ibooks/lulu integration
-
+* book search
 * site comments
 * github-side generation
-* external auto-publishing / monetization (?)
 * docbook import / direct from docbook
-
+* external auto-publishing / monetization (?)
+  - amazon/ibooks/lulu integration
