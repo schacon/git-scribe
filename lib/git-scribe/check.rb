@@ -7,28 +7,28 @@ class GitScribe
       # check for asciidoc
       if !check_can_run('asciidoc')
         info "asciidoc is not present, please install it for anything to work"
-        status[:asciidoc] = true
+        status[:asciidoc] = false
       else
         info "asciidoc - ok"
-        status[:asciidoc] = false
+        status[:asciidoc] = true
       end
 
       # check for xsltproc
       if !check_can_run('xsltproc --version')
         info "xsltproc is not present, please install it for html generation"
-        status[:xsltproc] = true
+        status[:xsltproc] = false
       else
         info "xsltproc - ok"
-        status[:xsltproc] = false
+        status[:xsltproc] = true
       end
 
       # check for a2x - should be installed with asciidoc, but you never know
       if !check_can_run('a2x')
         info "a2x is not present, please install it for epub generation"
-        status[:a2x] = true
+        status[:a2x] = false
       else
         info "a2x      - ok"
-        status[:a2x] = false
+        status[:a2x] = true
       end
 
       # check for source-highlight
@@ -44,19 +44,19 @@ class GitScribe
       # check for fop
       if !check_can_run('fop -version')
         info "fop is not present, please install for PDF generation"
-        status[:fop] = true
+        status[:fop] = false
       else
         info "fop      - ok"
-        status[:fop] = false
+        status[:fop] = true
       end
 
-      # check for calibre
-      if !check_can_run('ebook-convert --version')
-        info "calibre is not present, please install for mobi generation"
-        status[:calibre] = true
+      # check for kindlegen
+      if !check_can_run('kindlegen')
+        info "kindlegen is not present, please install for mobi generation"
+        status[:mobi] = false
       else
-        info "calibre  - ok"
-        status[:calibre] = false
+        info "kindlegen - ok"
+        status[:mobi] = true
       end
 
 

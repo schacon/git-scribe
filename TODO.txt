@@ -1,11 +1,13 @@
 To-Do List
 =============
 
-* generate hashes for generated assets and do not regenerate them unneccesarily
+* git-init after git scribe init
+
 * custom site layouts
 * custom/alternate themes (stylesheets)
 * cover page for site (author, about, etc)
 * book cover (w/template)
+* generate hashes for generated assets and do not regenerate them unneccesarily
 
 * book search
 * math formula

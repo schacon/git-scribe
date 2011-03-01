@@ -32,9 +32,7 @@ p, ul, ol, dl {
 	margin:10px 0
 }
 
-dl {
-	margin-left:40px
-}
+dl { }
 
 dt {
 	font-weight:normal;

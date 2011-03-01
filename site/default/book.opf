@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="2.0">
+
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+  <dc:title>{{title}}</dc:title>
+  <dc:language>en</dc:language>
+  <dc:creator>{{author}}</dc:creator>
+  <dc:date>{{pubdate}}</dc:date>
+  <dc:publisher>GitHub.com</dc:publisher>
+  <meta name="cover" content="cover"/>
+</metadata>
+
+<manifest>
+  <item id="book" media-type="application/xhtml+xml" href="book.html"></item>
+  <item id="toc_file" media-type="application/xhtml+xml" href="toc.html"></item>
+  <item id="toc" media-type="application/x-dtbncx+xml" href="book.ncx"/>
+  <item id="cover" media-type="image/jpeg" href="{{cover_image}}"/>
+</manifest>
+
+<spine toc="toc">
+  <itemref idref="book"/>
+</spine>
+
+<guide>
+  <reference type="toc" title="Table of Contents" href="toc.html"></reference>
+  <reference type="text" title="Contents" href="book.html"></reference>
+</guide>
+
+</package>
+

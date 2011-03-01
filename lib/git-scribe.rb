@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'nokogiri'
 require 'liquid'
+require 'yaml'
 
 require 'git-scribe/generate'
 require 'git-scribe/check'
@@ -26,6 +27,7 @@ class GitScribe
     @subcommand = nil
     @args = []
     @options = {}
+    @config = YAML::parse(File.open(local('.gitscribe'))).transform rescue {}
   end
 
   ## COMMANDS ##

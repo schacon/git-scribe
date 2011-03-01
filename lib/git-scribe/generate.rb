@@ -84,11 +84,9 @@ class GitScribe
     def do_mobi
       do_html
       info "GENERATING MOBI"
-      # --cover 'cover.png'
-      # --authors 'Author Name'
-      # --comments "licensed under CC"
-      # --language 'en'
-      cmd = "ebook-convert book.html book.mobi --level1-toc '//h:h1' --level2-toc '//h:h2' --level3-toc '//h:h3'"
+      generate_toc_files
+      # generate book.opf
+      cmd = "kindlegen -verbose book.opf -o book.mobi"
       if ex(cmd)
         'book.mobi'
       end
@@ -163,9 +161,8 @@ class GitScribe
       files = Dir.glob(template_dir + '/*')
       FileUtils.cp_r files, '.'
 
-      Liquid::Template.file_system = Liquid::LocalFileSystem.new(template_dir)
-      index_template = Liquid::Template.parse(File.read(File.join(template_dir, 'index.html')))
-      page_template = Liquid::Template.parse(File.read(File.join(template_dir, 'page.html')))
+      index_template = liquid_template('index.html')
+      page_template = liquid_template('page.html')
 
       # write the index page
       main_data = { 
@@ -230,6 +227,105 @@ class GitScribe
       end
       sections
     end
+
+    def generate_toc_files
+      # read book table of contents
+      toc = []
+      source = File.read("book.html")
+
+      # get the book title
+      book_title = 'Title'
+      if t = /\<title>(.*?)<\/title\>/.match(source)
+        book_title = t[0]
+      end
+
+      source.scan(/\<h([2|3]) id=\"(.*?)\"\>(.*?)\<\/h[2|3]\>/).each do |header|
+        sec = {'id' => header[1], 'name' => header[2]}
+        if header[0] == '2' 
+          toc << {'section' => sec, 'subsections' => []}
+        else
+          toc[toc.size - 1]['subsections'] << sec
+        end
+      end
+
+      # write ncx table of contents
+      ncx = File.open('book.ncx', 'w+')
+      ncx.puts('<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN"
+	"http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
+
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="en-US">
+<head>
+<meta name="dtb:depth" content="2"/>
+<meta name="dtb:totalPageCount" content="0"/>
+<meta name="dtb:maxPageNumber" content="0"/>
+</head>
+<docTitle><text>Title</text></docTitle>
+<docAuthor><text>Author</text></docAuthor>
+<navMap>
+<navPoint class="toc" id="toc" playOrder="1">
+<navLabel>
+<text>Table of Contents</text>
+</navLabel>
+<content src="toc.html"/>
+</navPoint>')
+
+      chapters = 0
+      toc.each do |section|
+        chapters += 1
+        ch = section['section']
+        ncx.puts('<navPoint class="chapter" id="chapter_' + chapters.to_s + '" playOrder="' + (chapters + 1).to_s + '">')
+        ncx.puts('<navLabel><text>' + ch['name'].to_s + '</text></navLabel>')
+        ncx.puts('<content src="book.html#' + ch['id'].to_s + '"/>')
+        ncx.puts('</navPoint>')
+      end
+      ncx.puts('</navMap></ncx>')
+      ncx.close
+
+      # build html toc
+      # write ncx table of contents
+      html = File.open('toc.html', 'w+')
+      html.puts('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>Table of Contents</title></head><body>
+<div><h1><b>TABLE OF CONTENTS</b></h1><br/>')
+
+      chapters = 0
+      toc.each do |section|
+        chapters += 1
+        ch = section['section']
+
+        html.puts('<h3><b>Chapter ' + chapters.to_s + '<br/>')
+        html.puts('<a href="book.html#' + ch['id'] + '">' + ch['name'] + '</a></b></h3><br/>')
+
+        section['subsections'].each do |sub|
+          html.puts('<a href="book.html#' + sub['id'] + '"><b>' + sub['name'] + '</b></a><br/>')
+        end
+      end
+      html.puts('<h1 class="centered">* * *</h1></div></body></html>')
+      html.close
+
+      # build book.opf file
+      opf_template = liquid_template('book.opf')
+      File.open('book.opf', 'w+') do |f|
+        lang   = @config['language'] || 'en'
+        author = @config['author'] || 'Author'
+        cover  = @config['cover'] || 'image/cover.jpg'
+        data = {'title'    => book_title,
+                'language' => lang,
+                'author'   => author,
+                'pubdate'  => Time.now.strftime("%Y-%m-%d"),
+                'cover_image' => cover}
+        f.puts opf_template.render( data )
+      end
+    end
+
+
+    def liquid_template(file)
+      template_dir = File.join(SCRIBE_ROOT, 'site', 'default')
+      Liquid::Template.parse(File.read(File.join(template_dir, file)))
+    end
+
 
     # create a new file by concatenating all the ones we find
     def gather_and_process
