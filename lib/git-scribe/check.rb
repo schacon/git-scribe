@@ -42,7 +42,7 @@ class GitScribe
 
 
       # check for fop
-      if !check_can_run('fop -version')
+      if !check_can_run('fop -v -out list')
         info "fop is not present, please install for PDF generation"
         status[:fop] = false
       else
