@@ -1,6 +1,8 @@
 To-Do List
 =============
 
+* move to GLI?
+
 * workflow
   - review / copy editing
   - translation
