@@ -97,7 +97,7 @@ class GitScribe
       info "GENERATING HTML"
       # TODO: look for custom stylesheets
       styledir = local('stylesheets')
-      cmd = "asciidoc -a stylesdir=#{styledir} -a theme=handbookish #{BOOK_FILE}"
+      cmd = "asciidoc -a stylesdir=#{styledir} -a theme=scribe #{BOOK_FILE}"
       if ex(cmd)
         @done['html'] == true
         'book.html'
