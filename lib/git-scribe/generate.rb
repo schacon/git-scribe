@@ -57,17 +57,20 @@ class GitScribe
     def do_pdf
       info "GENERATING PDF"
       do_docbook
-
-      java_options = {
-        'callout.graphics' => 0,
-        'navig.graphics'   => 0,
-        'admon.textlabel'  => 1,
-        'admon.graphics'   => 0,
+      # TODO: syntax highlighting (fop?)
+      strparams = {'callout.graphics' => 0,
+                   'navig.graphics' => 0,
+                   'admon.textlabel' => 1,
+                   'admon.graphics' => 0,
+                   'page.width' => '7.5in',
+                   'page.height' => '9in'
       }
-      run_xslt "-o #{local('book.fo')} #{local('book.xml')} #{base('docbook-xsl/fo.xsl')}", java_options
-      ex "fop -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
-
-      if $?.success?
+      param = strparams.map { |k, v| "--stringparam #{k} #{v}" }.join(' ')
+      cmd = "xsltproc  --nonet #{param} --output #{local('book.fo')} #{base('docbook-xsl/fo.xsl')} #{local('book.xml')}"
+      ex(cmd)
+      cmd = "fop -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
+      ex(cmd)
+      if $?.exitstatus == 0
         'book.pdf'
       end
     end

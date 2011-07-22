@@ -25,8 +25,8 @@
 <xsl:param name="fop1.extensions" select="1" />
 <xsl:param name="variablelist.as.blocks" select="1" />
 
-<xsl:param name="paper.type" select="'A4'"/>
 <!--
+<xsl:param name="paper.type" select="'A4'"/>
 <xsl:param name="paper.type" select="'USletter'"/>
 -->
 <xsl:param name="hyphenate">false</xsl:param>
