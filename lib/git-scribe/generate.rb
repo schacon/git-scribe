@@ -3,11 +3,11 @@ class GitScribe
     # generate the new media
     def gen(args = [])
       @done = {}  # what we've generated already
+      @remove_when_done = []
+      @wd = Dir.getwd
 
       type = first_arg(args) || 'all'
       prepare_output_dir
-
-      gather_and_process
 
       types = type == 'all' ? OUTPUT_TYPES : [type]
 
@@ -22,95 +22,310 @@ class GitScribe
             die "NOT A THING: #{call}"
           end
         end
-        # clean up
-        `rm #{BOOK_FILE}`
+        clean_up
         ret
       end
-    end
-
-    def prepare_output_dir
-      Dir.mkdir('output') rescue nil
-      Dir.chdir('output') do
-        Dir.mkdir('stylesheets') rescue nil
-        from_stdir = File.join(SCRIBE_ROOT, 'stylesheets')
-        FileUtils.cp_r from_stdir, '.'
-      end
-    end
-
-    def a2x(type)
-      "a2x -f #{type} -d book "
-    end
-
-    def a2x_wss(type)
-      a2x(type) + " --stylesheet=stylesheets/handbookish.css"
     end
 
     def do_docbook
       return true if @done['docbook']
       info "GENERATING DOCBOOK"
-      if ex("asciidoc -b docbook #{BOOK_FILE}")
+
+      if ex("asciidoc -b docbook --doctype book -v #{BOOK_FILE}")
         @done['docbook'] = true
         'book.xml'
       end
     end
 
     def do_pdf
+      return true if @done['pdf']
+
       info "GENERATING PDF"
       do_docbook
       # TODO: syntax highlighting (fop?)
+      # TODO: start chapters on the recto page
+      # (initial.page.number=auto-odd? break.before=page-even?)
       strparams = {'callout.graphics' => 0,
                    'navig.graphics' => 0,
                    'admon.textlabel' => 1,
-                   'admon.graphics' => 0}
+                   'admon.graphics' => 0,
+                   'page.width' => '7.5in',
+                   'page.height' => '9in'}
       param = strparams.map { |k, v| "--stringparam #{k} #{v}" }.join(' ')
       cmd = "xsltproc  --nonet #{param} --output #{local('book.fo')} #{base('docbook-xsl/fo.xsl')} #{local('book.xml')}"
       ex(cmd)
       cmd = "fop -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
       ex(cmd)
-      if $?.exitstatus == 0
-        'book.pdf'
-      end
+
+      return false unless $?.exitstatus == 0
+      @done['pdf'] = true
     end
 
     def do_epub
+      return true if @done['epub']
+
       info "GENERATING EPUB"
+
+      generate_docinfo
       # TODO: look for custom stylesheets
-      cmd = "#{a2x_wss('epub')} -v #{BOOK_FILE}"
-      if ex(cmd)
-        'book.epub'
-      end
+      cmd = "#{a2x_wss('epub')} -a docinfo -k -v #{BOOK_FILE}"
+      return false unless ex(cmd)
+
+      @done['epub'] = true
     end
 
     def do_mobi
-      do_html
+      return true if @done['mobi']
+
+      do_epub
+
       info "GENERATING MOBI"
-      generate_toc_files
-      # generate book.opf
-      cmd = "kindlegen -verbose book.opf -o book.mobi"
-      if ex(cmd)
-        'book.mobi'
-      end
+
+      decorate_epub_for_mobi
+
+      cmd = "kindlegen -verbose book_for_mobi.epub -o book.mobi"
+      return false unless ex(cmd)
+
+      @done['mobi'] = true
+    end
+
+    def do_ebook
+      do_pdf
+      do_epub
+      do_mobi
+      zip_ebook
     end
 
     def do_html
       return true if @done['html']
       info "GENERATING HTML"
+
       # TODO: look for custom stylesheets
       styledir = local('stylesheets')
       cmd = "asciidoc -a stylesdir=#{styledir} -a theme=scribe #{BOOK_FILE}"
-      if ex(cmd)
-        @done['html'] == true
-        'book.html'
-      end
+      return false unless ex(cmd)
+
+      @done['html'] = true
     end
 
     def do_site
       info "GENERATING SITE"
-      # TODO: check if html was already done
-      ex("asciidoc -b docbook #{BOOK_FILE}")
-      xsldir = base('docbook-xsl/xhtml')
-      ex("xsltproc --stringparam html.stylesheet stylesheets/handbookish.css --nonet #{xsldir}/chunk.xsl book.xml")
 
+      prepare_output_dir("site")
+      Dir.chdir("site") do
+        ex("asciidoc -b docbook #{BOOK_FILE}")
+        xsldir = base('docbook-xsl/xhtml')
+        ex("xsltproc --stringparam html.stylesheet stylesheets/scribe.css --nonet #{xsldir}/chunk.xsl book.xml")
+
+        clean_site
+      end
+    end
+
+    private
+    def prepare_output_dir(dir='output')
+      Dir.mkdir(dir) rescue nil
+      FileUtils.cp_r Dir.glob("#{@wd}/book/*"), dir
+
+      Dir.mkdir("#{dir}/stylesheets") rescue nil
+      FileUtils.cp_r File.join(SCRIBE_ROOT, 'stylesheets'), dir
+    end
+
+    def clean_up
+      FileUtils.rm Dir.glob('**/*.asc')
+      FileUtils.rm_r @remove_when_done
+    end
+
+    def ex(command)
+      out = `#{command} 2>&1`
+      info out
+      $?.exitstatus == 0
+    end
+
+    def generate_docinfo
+      docinfo_template = liquid_template('book-docinfo.xml')
+      File.open('book-docinfo.xml', 'w+') do |f|
+        cover  = @config['cover'] || 'images/cover.jpg'
+        data = {'title'       => book_title,
+                'cover_image' => cover}
+        f.puts docinfo_template.render( data )
+      end
+    end
+
+    def a2x_wss(type)
+      a2x(type) + " --stylesheet=stylesheets/scribe.css"
+    end
+
+    def a2x(type)
+      "a2x -f #{type} -d book "
+    end
+
+    def decorate_epub_for_mobi
+      add_epub_etype
+      add_epub_toc
+      flatten_ncx
+      clean_epub_html
+      clean_epub_css
+      zip_epub_for_mobi
+    end
+
+    def add_epub_etype
+      Dir.chdir('book.epub.d') do
+        FileUtils.cp 'mimetype', 'etype'
+      end
+    end
+
+    def add_epub_toc
+      build_html_toc
+      add_html_toc_to_opf
+    end
+
+    def build_html_toc
+      Dir.chdir('book.epub.d/OEBPS') do
+        ncx = File.read('toc.ncx')
+        titles = ncx.scan(%r{^          <ncx:text>(.+?)</ncx:text>}m).flatten
+        urls = ncx.scan(%r{^        <ncx:content src="(.+?)"/>}m).flatten
+
+        titles_and_urls = titles.zip(urls).reject { |entry|
+          entry[1].match(/^pr\d+.html$/) &&
+          !entry[0].match(/introduction/i)
+        }
+
+        File.open("toc.html", 'w') do |f|
+          f.puts('<?xml version="1.0" encoding="UTF-8"?>')
+          f.puts('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>Table of Contents</title></head><body>')
+          titles_and_urls.each do |entry|
+            f.puts <<_EOM
+<div>
+<span class="chapter">
+<a href="#{entry[1]}">#{entry[0]}</a>
+</span>
+</div>
+_EOM
+          end
+          f.puts('</body></html>')
+        end
+      end
+    end
+
+    def add_html_toc_to_opf
+      Dir.chdir('book.epub.d/OEBPS') do
+        opf = File.read('content.opf')
+        opf = add_html_toc_to_opf_manifest(opf)
+        opf = add_html_toc_to_opf_spine(opf)
+        opf = add_html_toc_to_opf_guide(opf)
+        File.open('content.opf', 'w') do |f|
+          f.puts opf
+        end
+      end
+    end
+
+    def add_html_toc_to_opf_manifest(opf)
+      opf.sub(/<item id="ncxtoc".+?>/) { |s|
+        s + "\n" +
+          %q|    <item id="htmltoc" | +
+                    %q|media-type="application/xhtml+xml" | +
+                    %q|href="toc.html"/>| }
+    end
+    def add_html_toc_to_opf_spine(opf)
+      opf.sub(/<itemref idref="cover".+?>/) { |s|
+        s + "\n" +
+          %q|    <itemref idref="htmltoc" linear="no"/>| }
+    end
+    def add_html_toc_to_opf_guide(opf)
+      opf.sub(/<\/guide>/) { |s|
+        "  " +
+        %q|<reference href="toc.html" type="toc" title="Table of Contents"/>| +
+        "\n  " +
+        s }
+    end
+
+    def flatten_ncx
+      nav_points = ncx_nav_points.map { |x| x.gsub(/^\s+/, '') }
+
+      Dir.chdir('book.epub.d/OEBPS') do
+        ncx = File.read('toc.ncx')
+
+        File.open("toc.ncx", 'w') do |f|
+          f.write ncx.sub(
+            /<ncx:navMap>.+<\/ncx:navMap>/m,
+            "<ncx:navMap>\n#{nav_points.join("\n")}\n</ncx:navMap>"
+          )
+        end
+      end
+    end
+
+    def ncx_nav_points
+      nav_points = []
+
+      Dir.chdir('book.epub.d/OEBPS') do
+        nav_points = File.read('toc.ncx').
+          scan(%r{<ncx:navPoint.+?<ncx:content src=.+?/>}m)
+      end
+
+      nav_points.
+        flatten.
+        map { |x| x + "\n</ncx:navPoint>" }
+    end
+
+    def clean_epub_html
+      Dir.glob('book.epub.d/OEBPS/*.html').
+        each { |file| clean_html(file) }
+    end
+
+    def clean_html(file)
+      content = File.read(file)
+      File.open(file, 'w') do |f|
+        f.write content.
+          gsub(%r"<li(.*?)>\s*(.+?)\s*</li>"m, '<li\1>\2</li>').
+          gsub(%r"<li(.*?)>\s+(.+?)\s*</li>"m, '<li\1>\2</li>').
+          gsub(%r'<h([123] class="title".*?)><a (id=".+?")[></a]+>'m, '<h\1 \2>')
+      end
+    end
+
+    def clean_epub_css
+      Dir.chdir('book.epub.d/OEBPS/stylesheets') do
+        content = File.read('scribe.css')
+        File.open('scribe.css', 'w') do |f|
+          f.write content.sub(/^pre[^}]+/m) { |s|
+            s + "  font-size: 8px;\n"
+          }
+        end
+      end
+    end
+
+    def zip_epub_for_mobi
+      @remove_when_done <<
+        'book.epub.d' <<
+        'book_for_mobi.epub'
+
+      Dir.chdir('book.epub.d') do
+        ex("zip ../book_for_mobi.epub . -r")
+      end
+    end
+
+    def zip_ebook
+      file_name = book_title.downcase.gsub(/\s+/, '_')
+
+      Dir.mkdir(file_name) rescue nil
+      FileUtils.cp 'book.pdf', "#{file_name}/#{file_name}.pdf"
+      FileUtils.cp 'book.epub', "#{file_name}/#{file_name}.epub"
+      FileUtils.cp 'book.mobi', "#{file_name}/#{file_name}.mobi"
+
+      ex("zip #{file_name}.zip #{file_name} -r")
+    end
+
+    def book_title
+      do_html
+
+      source = File.read("book.html")
+      t = /\<title>(.*?)<\/title\>/.match(source)
+
+      t ? t[1] : 'Title'
+    end
+
+    def clean_site
       source = File.read('index.html')
       html = Nokogiri::HTML.parse(source, nil, 'utf-8')
 
@@ -165,7 +380,7 @@ class GitScribe
       page_template = liquid_template('page.html')
 
       # write the index page
-      main_data = { 
+      main_data = {
         'book_title' => book_title,
         'sections' => sections
       }
@@ -175,7 +390,7 @@ class GitScribe
 
       # write the title page
       File.open('title.html', 'w+') do |f|
-        data = { 
+        data = {
           'title' => sections.first['title'],
           'sub' => sections.first['sub'],
           'prev' => {'link' => 'index.html', 'title' => "Main"},
@@ -204,7 +419,7 @@ class GitScribe
             if i <= sections.size
               next_section = sections[i+1]
             end
-            data = { 
+            data = {
               'title' => section['title'],
               'sub' => section['sub'],
               'prev' => sections[i-1],
@@ -228,116 +443,10 @@ class GitScribe
       sections
     end
 
-    def generate_toc_files
-      # read book table of contents
-      toc = []
-      source = File.read("book.html")
-
-      # get the book title
-      book_title = 'Title'
-      if t = /\<title>(.*?)<\/title\>/.match(source)
-        book_title = t[0]
-      end
-
-      source.scan(/\<h([2|3]) id=\"(.*?)\"\>(.*?)\<\/h[2|3]\>/).each do |header|
-        sec = {'id' => header[1], 'name' => header[2]}
-        if header[0] == '2' 
-          toc << {'section' => sec, 'subsections' => []}
-        else
-          toc[toc.size - 1]['subsections'] << sec
-        end
-      end
-
-      # write ncx table of contents
-      ncx = File.open('book.ncx', 'w+')
-      ncx.puts('<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN"
-	"http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
-
-<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="en-US">
-<head>
-<meta name="dtb:depth" content="2"/>
-<meta name="dtb:totalPageCount" content="0"/>
-<meta name="dtb:maxPageNumber" content="0"/>
-</head>
-<docTitle><text>Title</text></docTitle>
-<docAuthor><text>Author</text></docAuthor>
-<navMap>
-<navPoint class="toc" id="toc" playOrder="1">
-<navLabel>
-<text>Table of Contents</text>
-</navLabel>
-<content src="toc.html"/>
-</navPoint>')
-
-      chapters = 0
-      toc.each do |section|
-        chapters += 1
-        ch = section['section']
-        ncx.puts('<navPoint class="chapter" id="chapter_' + chapters.to_s + '" playOrder="' + (chapters + 1).to_s + '">')
-        ncx.puts('<navLabel><text>' + ch['name'].to_s + '</text></navLabel>')
-        ncx.puts('<content src="book.html#' + ch['id'].to_s + '"/>')
-        ncx.puts('</navPoint>')
-      end
-      ncx.puts('</navMap></ncx>')
-      ncx.close
-
-      # build html toc
-      # write ncx table of contents
-      html = File.open('toc.html', 'w+')
-      html.puts('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head><title>Table of Contents</title></head><body>
-<div><h1><b>TABLE OF CONTENTS</b></h1><br/>')
-
-      chapters = 0
-      toc.each do |section|
-        chapters += 1
-        ch = section['section']
-
-        html.puts('<h3><b>Chapter ' + chapters.to_s + '<br/>')
-        html.puts('<a href="book.html#' + ch['id'] + '">' + ch['name'] + '</a></b></h3><br/>')
-
-        section['subsections'].each do |sub|
-          html.puts('<a href="book.html#' + sub['id'] + '"><b>' + sub['name'] + '</b></a><br/>')
-        end
-      end
-      html.puts('<h1 class="centered">* * *</h1></div></body></html>')
-      html.close
-
-      # build book.opf file
-      opf_template = liquid_template('book.opf')
-      File.open('book.opf', 'w+') do |f|
-        lang   = @config['language'] || 'en'
-        author = @config['author'] || 'Author'
-        cover  = @config['cover'] || 'image/cover.jpg'
-        data = {'title'    => book_title,
-                'language' => lang,
-                'author'   => author,
-                'pubdate'  => Time.now.strftime("%Y-%m-%d"),
-                'cover_image' => cover}
-        f.puts opf_template.render( data )
-      end
-    end
-
 
     def liquid_template(file)
       template_dir = File.join(SCRIBE_ROOT, 'site', 'default')
       Liquid::Template.parse(File.read(File.join(template_dir, file)))
     end
-
-
-    # create a new file by concatenating all the ones we find
-    def gather_and_process
-      files = Dir.glob("book/*")
-      FileUtils.cp_r files, 'output'
-    end
-
-    def ex(command)
-      out = `#{command} 2>&1`
-      info out
-      $?.exitstatus == 0
-    end
-
   end
 end
