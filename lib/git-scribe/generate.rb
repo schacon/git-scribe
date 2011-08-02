@@ -310,7 +310,7 @@ class GitScribe
       File.open('book.opf', 'w+') do |f|
         lang   = @config['language'] || 'en'
         author = @config['author'] || 'Author'
-        cover  = @config['cover'] || 'image/cover.jpg'
+        cover  = @config['cover'] || 'images/cover.jpg'
         data = {'title'    => book_title,
                 'language' => lang,
                 'author'   => author,
