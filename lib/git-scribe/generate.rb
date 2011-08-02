@@ -48,7 +48,8 @@ class GitScribe
     def do_docbook
       return true if @done['docbook']
       info "GENERATING DOCBOOK"
-      if ex("asciidoc -b docbook #{BOOK_FILE}")
+
+      if ex("asciidoc -b docbook --doctype book -v #{BOOK_FILE}")
         @done['docbook'] = true
         'book.xml'
       end
@@ -63,7 +64,8 @@ class GitScribe
                    'admon.textlabel' => 1,
                    'admon.graphics' => 0,
                    'page.width' => '7.5in',
-                   'page.height' => '9in'
+                   'page.height' => '9in',
+                   'initial-page-number' => 'auto-odd'
       }
       param = strparams.map { |k, v| "--stringparam #{k} #{v}" }.join(' ')
       cmd = "xsltproc  --nonet #{param} --output #{local('book.fo')} #{base('docbook-xsl/fo.xsl')} #{local('book.xml')}"
