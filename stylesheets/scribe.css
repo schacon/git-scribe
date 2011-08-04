@@ -25,6 +25,7 @@ tt {
 	font-family:consolas, 'lucida console', 'bitstream vera sans mono',
 	           'courier new', monospace;
 	color:#000;
+  font-size: 8px;
 }
 
 p, ul, ol, dl {
@@ -78,7 +79,7 @@ h5 {
 	line-height:1.1;
 }
 
-#header { 
+#header {
 	text-align:center;
 	margin-bottom:30px;
 }
