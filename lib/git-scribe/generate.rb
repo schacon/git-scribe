@@ -42,7 +42,7 @@ class GitScribe
     end
 
     def a2x_wss(type)
-      a2x(type) + " --stylesheet=stylesheets/handbookish.css"
+      a2x(type) + " --stylesheet=stylesheets/scribe.css"
     end
 
     def do_docbook
@@ -109,7 +109,7 @@ class GitScribe
       # TODO: check if html was already done
       ex("asciidoc -b docbook #{BOOK_FILE}")
       xsldir = base('docbook-xsl/xhtml')
-      ex("xsltproc --stringparam html.stylesheet stylesheets/handbookish.css --nonet #{xsldir}/chunk.xsl book.xml")
+      ex("xsltproc --stringparam html.stylesheet stylesheets/scribe.css --nonet #{xsldir}/chunk.xsl book.xml")
 
       source = File.read('index.html')
       html = Nokogiri::HTML.parse(source, nil, 'utf-8')
@@ -165,7 +165,7 @@ class GitScribe
       page_template = liquid_template('page.html')
 
       # write the index page
-      main_data = { 
+      main_data = {
         'book_title' => book_title,
         'sections' => sections
       }
@@ -175,7 +175,7 @@ class GitScribe
 
       # write the title page
       File.open('title.html', 'w+') do |f|
-        data = { 
+        data = {
           'title' => sections.first['title'],
           'sub' => sections.first['sub'],
           'prev' => {'link' => 'index.html', 'title' => "Main"},
@@ -204,7 +204,7 @@ class GitScribe
             if i <= sections.size
               next_section = sections[i+1]
             end
-            data = { 
+            data = {
               'title' => section['title'],
               'sub' => section['sub'],
               'prev' => sections[i-1],
@@ -241,7 +241,7 @@ class GitScribe
 
       source.scan(/\<h([2|3]) id=\"(.*?)\"\>(.*?)\<\/h[2|3]\>/).each do |header|
         sec = {'id' => header[1], 'name' => header[2]}
-        if header[0] == '2' 
+        if header[0] == '2'
           toc << {'section' => sec, 'subsections' => []}
         else
           toc[toc.size - 1]['subsections'] << sec
