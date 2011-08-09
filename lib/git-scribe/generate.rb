@@ -100,12 +100,22 @@ class GitScribe
     def do_html
       return true if @done['html']
       info "GENERATING HTML"
+
       # TODO: look for custom stylesheets
-      styledir = local('stylesheets')
-      cmd = "asciidoc -a stylesdir=#{styledir} -a theme=scribe #{BOOK_FILE}"
+      cmd = "#{a2x_wss('xhtml')} -a docinfo -v #{BOOK_FILE}"
       if ex(cmd)
-        @done['html'] == true
+        clean_html('book.html')
+        @done['html'] = true
         'book.html'
+      end
+    end
+
+    def clean_html(file)
+      content = File.read(file)
+      File.open(file, 'w') do |f|
+        f.write content.
+          gsub(%r"<li(.*?)>\s*(.+?)\s*</li>"m, '<li\1>\2</li>').
+          gsub(%r'<h([23] class="title".*?)><a (id=".+?")></a>'m, '<h\1 \2>')
       end
     end
 
@@ -234,6 +244,33 @@ class GitScribe
     end
 
     def generate_toc_files
+      extract_toc
+      build_ncx
+      build_opf
+    end
+
+
+    def extract_toc
+      content = File.read("book.html")
+
+      File.open("book.html", 'w') do |f|
+        f.write content.sub(%r|<div class="toc">.+?</dl></div>|m, '')
+      end
+
+      toc = Regexp.last_match[0].
+        gsub(/href="#/, 'href="book.html#')
+
+      File.open("toc.html", 'w') do |f|
+        f.puts('<?xml version="1.0" encoding="UTF-8"?>')
+        f.puts('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>Table of Contents</title></head><body>')
+        f.puts toc
+        f.puts('</body></html>')
+      end
+    end
+
+    def build_ncx
       # read book table of contents
       toc = []
       source = File.read("book.html")
@@ -244,7 +281,7 @@ class GitScribe
         book_title = t[0]
       end
 
-      source.scan(/\<h([2|3]) id=\"(.*?)\"\>(.*?)\<\/h[2|3]\>/).each do |header|
+      source.scan(/\<h([2|3]) class="title".*?id=\"(.*?)\".*?>(.*?)\<\/h[2|3]\>/).each do |header|
         sec = {'id' => header[1], 'name' => header[2]}
         if header[0] == '2'
           toc << {'section' => sec, 'subsections' => []}
@@ -286,31 +323,9 @@ class GitScribe
       end
       ncx.puts('</navMap></ncx>')
       ncx.close
+    end
 
-      # build html toc
-      # write ncx table of contents
-      html = File.open('toc.html', 'w+')
-      html.puts('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head><title>Table of Contents</title></head><body>
-<div><h1><b>TABLE OF CONTENTS</b></h1><br/>')
-
-      chapters = 0
-      toc.each do |section|
-        chapters += 1
-        ch = section['section']
-
-        html.puts('<h3><b>Chapter ' + chapters.to_s + '<br/>')
-        html.puts('<a href="book.html#' + ch['id'] + '">' + ch['name'] + '</a></b></h3><br/>')
-
-        section['subsections'].each do |sub|
-          html.puts('<a href="book.html#' + sub['id'] + '"><b>' + sub['name'] + '</b></a><br/>')
-        end
-      end
-      html.puts('<h1 class="centered">* * *</h1></div></body></html>')
-      html.close
-
-      # build book.opf file
+    def build_opf
       opf_template = liquid_template('book.opf')
       File.open('book.opf', 'w+') do |f|
         lang   = @config['language'] || 'en'
@@ -324,7 +339,6 @@ class GitScribe
         f.puts opf_template.render( data )
       end
     end
-
 
     def liquid_template(file)
       template_dir = File.join(SCRIBE_ROOT, 'site', 'default')

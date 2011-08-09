@@ -21,7 +21,7 @@ strong {
 	color:#000;
 }
 
-tt {
+pre, tt {
 	font-family:consolas, 'lucida console', 'bitstream vera sans mono',
 	           'courier new', monospace;
 	color:#000;
@@ -29,7 +29,11 @@ tt {
 }
 
 p, ul, ol, dl {
-	margin:10px 0
+	margin:10px 0px;
+}
+
+p {
+  text-indent: 0px;
 }
 
 dl {
