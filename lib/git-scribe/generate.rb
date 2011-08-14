@@ -3,6 +3,7 @@ class GitScribe
     # generate the new media
     def gen(args = [])
       @done = {}  # what we've generated already
+      @remove_when_done = []
 
       type = first_arg(args) || 'all'
       prepare_output_dir
@@ -22,8 +23,7 @@ class GitScribe
             die "NOT A THING: #{call}"
           end
         end
-        # clean up
-        `rm #{BOOK_FILE}`
+        clean_up
         ret
       end
     end
@@ -124,6 +124,11 @@ class GitScribe
     def gather_and_process
       files = Dir.glob("book/*")
       FileUtils.cp_r files, 'output'
+    end
+
+    def clean_up
+      FileUtils.rm Dir.glob('**/*.asc')
+      FileUtils.rm_r @remove_when_done
     end
 
     def ex(command)
@@ -287,6 +292,10 @@ _EOM
     end
 
     def zip_epub_for_mobi
+      @remove_when_done <<
+        'book.epub.d' <<
+        'book_for_mobi.epub'
+
       Dir.chdir('book.epub.d') do
         ex("zip ../book_for_mobi.epub . -r")
       end
