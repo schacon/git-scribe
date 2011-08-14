@@ -39,6 +39,8 @@ class GitScribe
     end
 
     def do_pdf
+      return true if @done['pdf']
+
       info "GENERATING PDF"
       do_docbook
       # TODO: syntax highlighting (fop?)
@@ -55,9 +57,9 @@ class GitScribe
       ex(cmd)
       cmd = "fop -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
       ex(cmd)
-      if $?.exitstatus == 0
-        'book.pdf'
-      end
+
+      return false unless $?.exitstatus == 0
+      @done['pdf'] = true
     end
 
     def do_epub
