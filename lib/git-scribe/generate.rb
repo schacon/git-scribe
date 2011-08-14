@@ -28,23 +28,6 @@ class GitScribe
       end
     end
 
-    def prepare_output_dir
-      Dir.mkdir('output') rescue nil
-      Dir.chdir('output') do
-        Dir.mkdir('stylesheets') rescue nil
-        from_stdir = File.join(SCRIBE_ROOT, 'stylesheets')
-        FileUtils.cp_r from_stdir, '.'
-      end
-    end
-
-    def a2x(type)
-      "a2x -f #{type} -d book "
-    end
-
-    def a2x_wss(type)
-      a2x(type) + " --stylesheet=stylesheets/scribe.css"
-    end
-
     def do_docbook
       return true if @done['docbook']
       info "GENERATING DOCBOOK"
@@ -114,10 +97,158 @@ class GitScribe
       cmd = "asciidoc -a stylesdir=#{styledir} -a theme=scribe #{BOOK_FILE}"
       return false unless ex(cmd)
 
-      clean_html('book.html')
       @done['html'] = true
     end
 
+    private
+    def prepare_output_dir
+      Dir.mkdir('output') rescue nil
+      Dir.chdir('output') do
+        Dir.mkdir('stylesheets') rescue nil
+        from_stdir = File.join(SCRIBE_ROOT, 'stylesheets')
+        FileUtils.cp_r from_stdir, '.'
+      end
+    end
+
+    # create a new file by concatenating all the ones we find
+    def gather_and_process
+      files = Dir.glob("book/*")
+      FileUtils.cp_r files, 'output'
+    end
+
+    def ex(command)
+      out = `#{command} 2>&1`
+      info out
+      $?.exitstatus == 0
+    end
+
+    def generate_docinfo
+      docinfo_template = liquid_template('book-docinfo.xml')
+      File.open('book-docinfo.xml', 'w+') do |f|
+        cover  = @config['cover'] || 'images/cover.jpg'
+        data = {'title'       => book_title,
+                'cover_image' => cover}
+        f.puts docinfo_template.render( data )
+      end
+    end
+
+    def a2x_wss(type)
+      a2x(type) + " --stylesheet=stylesheets/scribe.css"
+    end
+
+    def a2x(type)
+      "a2x -f #{type} -d book "
+    end
+
+    def decorate_epub_for_mobi
+      add_epub_etype
+      add_epub_toc
+      flatten_ncx
+      clean_epub_html
+      clean_epub_css
+      zip_epub_for_mobi
+    end
+
+    def add_epub_etype
+      Dir.chdir('book.epub.d') do
+        FileUtils.cp 'mimetype', 'etype'
+      end
+    end
+
+    def add_epub_toc
+      build_html_toc
+      add_html_toc_to_opf
+    end
+
+    def build_html_toc
+      Dir.chdir('book.epub.d/OEBPS') do
+        ncx = File.read('toc.ncx')
+        titles = ncx.scan(%r{^          <ncx:text>(.+?)</ncx:text>}m).flatten
+        urls = ncx.scan(%r{^        <ncx:content src="(.+?)"/>}m).flatten
+
+        titles_and_urls = titles.zip(urls).reject { |entry|
+          entry[1].match(/^pr\d+.html$/) &&
+          !entry[0].match(/introduction/i)
+        }
+
+        File.open("toc.html", 'w') do |f|
+          f.puts('<?xml version="1.0" encoding="UTF-8"?>')
+          f.puts('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>Table of Contents</title></head><body>')
+          titles_and_urls.each do |entry|
+            f.puts <<_EOM
+<div>
+<span class="chapter">
+<a href="#{entry[1]}">#{entry[0]}</a>
+</span>
+</div>
+_EOM
+          end
+          f.puts('</body></html>')
+        end
+      end
+    end
+
+    def add_html_toc_to_opf
+      Dir.chdir('book.epub.d/OEBPS') do
+        opf = File.read('content.opf')
+        opf = add_html_toc_to_opf_manifest(opf)
+        opf = add_html_toc_to_opf_spine(opf)
+        opf = add_html_toc_to_opf_guide(opf)
+        File.open('content.opf', 'w') do |f|
+          f.puts opf
+        end
+      end
+    end
+
+    def add_html_toc_to_opf_manifest(opf)
+      opf.sub(/<item id="ncxtoc".+?>/) { |s|
+        s + "\n" +
+          %q|    <item id="htmltoc" | +
+                    %q|media-type="application/xhtml+xml" | +
+                    %q|href="toc.html"/>| }
+    end
+    def add_html_toc_to_opf_spine(opf)
+      opf.sub(/<itemref idref="cover".+?>/) { |s|
+        s + "\n" +
+          %q|    <itemref idref="htmltoc" linear="no"/>| }
+    end
+    def add_html_toc_to_opf_guide(opf)
+      opf.sub(/<\/guide>/) { |s|
+        "  " +
+        %q|<reference href="toc.html" type="toc" title="Table of Contents"/>| +
+        "\n  " +
+        s }
+    end
+
+    def flatten_ncx
+      nav_points = ncx_nav_points.map { |x| x.gsub(/^\s+/, '') }
+
+      Dir.chdir('book.epub.d/OEBPS') do
+        ncx = File.read('toc.ncx')
+
+        File.open("toc.ncx", 'w') do |f|
+          f.write ncx.sub(
+            /<ncx:navMap>.+<\/ncx:navMap>/m,
+            "<ncx:navMap>\n#{nav_points.join("\n")}\n</ncx:navMap>"
+          )
+        end
+      end
+    end
+
+    def ncx_nav_points
+      nav_points = []
+
+      Dir.chdir('book.epub.d/OEBPS') do
+        nav_points = File.read('toc.ncx').
+          scan(%r{<ncx:navPoint.+?<ncx:content src=.+?/>}m)
+      end
+
+      nav_points.
+        flatten.
+        map { |x| x + "\n</ncx:navPoint>" }
+    end
 
     def clean_epub_html
       Dir.glob('book.epub.d/OEBPS/*.html').
@@ -142,6 +273,12 @@ class GitScribe
             s + "  font-size: 8px;\n"
           }
         end
+      end
+    end
+
+    def zip_epub_for_mobi
+      Dir.chdir('book.epub.d') do
+        ex("zip ../book_for_mobi.epub . -r")
       end
     end
 
@@ -269,16 +406,6 @@ class GitScribe
       sections
     end
 
-    def generate_docinfo
-      docinfo_template = liquid_template('book-docinfo.xml')
-      File.open('book-docinfo.xml', 'w+') do |f|
-        cover  = @config['cover'] || 'images/cover.jpg'
-        data = {'title'       => book_title,
-                'cover_image' => cover}
-        f.puts docinfo_template.render( data )
-      end
-    end
-
     def book_title
       do_html
 
@@ -287,131 +414,6 @@ class GitScribe
 
       t ? t[1] : 'Title'
     end
-
-
-    def decorate_epub_for_mobi
-      add_epub_etype
-      add_epub_toc
-      flatten_ncx
-      clean_epub_html
-      clean_epub_css
-      zip_epub_for_mobi
-    end
-
-    def add_epub_etype
-      Dir.chdir('book.epub.d') do
-        FileUtils.cp 'mimetype', 'etype'
-      end
-    end
-
-    def add_epub_toc
-      build_html_toc
-      add_html_toc_to_opf
-    end
-
-    def build_html_toc
-      Dir.chdir('book.epub.d/OEBPS') do
-        ncx = File.read('toc.ncx')
-        titles = ncx.scan(%r{^          <ncx:text>(.+?)</ncx:text>}m).flatten
-        urls = ncx.scan(%r{^        <ncx:content src="(.+?)"/>}m).flatten
-
-        titles_and_urls = titles.zip(urls).reject { |entry|
-          entry[1].match(/^pr\d+.html$/) &&
-          !entry[0].match(/introduction/i)
-        }
-
-        File.open("toc.html", 'w') do |f|
-          f.puts('<?xml version="1.0" encoding="UTF-8"?>')
-          f.puts('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head><title>Table of Contents</title></head><body>')
-          titles_and_urls.each do |entry|
-            f.puts <<_EOM
-<div>
-<span class="chapter">
-<a href="#{entry[1]}">#{entry[0]}</a>
-</span>
-</div>
-_EOM
-          end
-          f.puts('</body></html>')
-        end
-      end
-    end
-
-    def add_html_toc_to_opf
-      Dir.chdir('book.epub.d/OEBPS') do
-        opf = File.read('content.opf')
-        opf = add_html_toc_to_opf_manifest(opf)
-        opf = add_html_toc_to_opf_spine(opf)
-        opf = add_html_toc_to_opf_guide(opf)
-        File.open('content.opf', 'w') do |f|
-          f.puts opf
-        end
-      end
-    end
-
-    def add_html_toc_to_opf_manifest(opf)
-      opf.sub(/<item id="ncxtoc".+?>/) { |s|
-        s + "\n" +
-          %q|    <item id="htmltoc" | +
-                    %q|media-type="application/xhtml+xml" | +
-                    %q|href="toc.html"/>| }
-    end
-    def add_html_toc_to_opf_spine(opf)
-      opf.sub(/<itemref idref="cover".+?>/) { |s|
-        s + "\n" +
-          %q|    <itemref idref="htmltoc" linear="no"/>| }
-    end
-    def add_html_toc_to_opf_guide(opf)
-      opf.sub(/<\/guide>/) { |s|
-        "  " +
-        %q|<reference href="toc.html" type="toc" title="Table of Contents"/>| +
-        "\n  " +
-        s }
-    end
-
-    def flatten_ncx
-      nav_points = ncx_nav_points.map { |x| x.gsub(/^\s+/, '') }
-
-      Dir.chdir('book.epub.d/OEBPS') do
-        ncx = File.read('toc.ncx')
-
-        File.open("toc.ncx", 'w') do |f|
-          f.write ncx.sub(
-            /<ncx:navMap>.+<\/ncx:navMap>/m,
-            "<ncx:navMap>\n#{nav_points.join("\n")}\n</ncx:navMap>"
-          )
-        end
-      end
-    end
-
-    def ncx_nav_points
-      nav_points = []
-
-      Dir.chdir('book.epub.d/OEBPS') do
-        nav_points = File.read('toc.ncx').
-          scan(%r{<ncx:navPoint.+?<ncx:content src=.+?/>}m)
-      end
-
-      nav_points.
-        flatten.
-        map { |x| x + "\n</ncx:navPoint>" }
-    end
-
-    def zip_epub_for_mobi
-      Dir.chdir('book.epub.d') do
-        ex("zip ../book_for_mobi.epub . -r")
-      end
-    end
-
-
-    def generate_toc_files
-      extract_toc
-      build_ncx
-      add_ncx_to_opf
-    end
-
 
     def extract_toc
       content = File.read("book.html")
@@ -505,43 +507,6 @@ _EOM
     def liquid_template(file)
       template_dir = File.join(SCRIBE_ROOT, 'site', 'default')
       Liquid::Template.parse(File.read(File.join(template_dir, file)))
-    end
-
-
-    # create a new file by concatenating all the ones we find
-    def gather_and_process
-      files = Dir.glob("book/*")
-      FileUtils.cp_r files, 'output', :remove_destination => true
-    end
-
-    def ex(command)
-      out = `#{command} 2>&1`
-      info out
-      $?.success?
-    end
-
-    private
-
-    def windows?
-      RbConfig::CONFIG['host_os'] =~ /mswin|windows|mingw|cygwin/i
-    end
-
-    def classpath_delimiter
-      if windows?
-        ";"
-      else
-        ":"
-      end
-    end
-
-    def run_xslt(jar_arguments, java_options)
-      ex <<-SH
-        java -cp "#{base('vendor/saxon.jar')}#{classpath_delimiter}#{base('vendor/xslthl-2.0.2.jar')}" \
-             -Dxslthl.config=file://"#{base('docbook-xsl/highlighting/xslthl-config.xml')}" \
-             #{java_options.map { |k, v| "-D#{k}=#{v}" }.join(' ')} \
-             com.icl.saxon.StyleSheet \
-             #{jar_arguments}
-      SH
     end
   end
 end
