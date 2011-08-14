@@ -100,6 +100,16 @@ class GitScribe
       @done['html'] = true
     end
 
+    def do_site
+      info "GENERATING SITE"
+      # TODO: check if html was already done
+      ex("asciidoc -b docbook #{BOOK_FILE}")
+      xsldir = base('docbook-xsl/xhtml')
+      ex("xsltproc --stringparam html.stylesheet stylesheets/scribe.css --nonet #{xsldir}/chunk.xsl book.xml")
+
+      clean_site
+    end
+
     private
     def prepare_output_dir
       Dir.mkdir('output') rescue nil
@@ -282,13 +292,16 @@ _EOM
       end
     end
 
-    def do_site
-      info "GENERATING SITE"
-      # TODO: check if html was already done
-      ex("asciidoc -b docbook #{BOOK_FILE}")
-      xsldir = base('docbook-xsl/xhtml')
-      ex("xsltproc --stringparam html.stylesheet stylesheets/scribe.css --nonet #{xsldir}/chunk.xsl book.xml")
+    def book_title
+      do_html
 
+      source = File.read("book.html")
+      t = /\<title>(.*?)<\/title\>/.match(source)
+
+      t ? t[1] : 'Title'
+    end
+
+    def clean_site
       source = File.read('index.html')
       html = Nokogiri::HTML.parse(source, nil, 'utf-8')
 
@@ -406,103 +419,6 @@ _EOM
       sections
     end
 
-    def book_title
-      do_html
-
-      source = File.read("book.html")
-      t = /\<title>(.*?)<\/title\>/.match(source)
-
-      t ? t[1] : 'Title'
-    end
-
-    def extract_toc
-      content = File.read("book.html")
-
-      File.open("book.html", 'w') do |f|
-        f.write content.sub(%r|<div class="toc">.+?</dl></div>|m, '')
-      end
-
-      toc = Regexp.last_match[0].
-        gsub(/href="#/, 'href="book.html#')
-
-      File.open("toc.html", 'w') do |f|
-        f.puts('<?xml version="1.0" encoding="UTF-8"?>')
-        f.puts('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head><title>Table of Contents</title></head><body>')
-        f.puts toc
-        f.puts('</body></html>')
-      end
-    end
-
-    def build_ncx
-      # read book table of contents
-      toc = []
-      source = File.read("book.html")
-
-      # get the book title
-      book_title = 'Title'
-      if t = /\<title>(.*?)<\/title\>/.match(source)
-        book_title = t[0]
-      end
-
-      source.scan(/\<h([2|3]) class="title".*?id=\"(.*?)\".*?>(.*?)\<\/h[2|3]\>/).each do |header|
-        sec = {'id' => header[1], 'name' => header[2]}
-        if header[0] == '2'
-          toc << {'section' => sec, 'subsections' => []}
-        else
-          toc[toc.size - 1]['subsections'] << sec
-        end
-      end
-
-      # write ncx table of contents
-      ncx = File.open('book.ncx', 'w+')
-      ncx.puts('<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN"
-	"http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
-
-<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="en-US">
-<head>
-<meta name="dtb:depth" content="2"/>
-<meta name="dtb:totalPageCount" content="0"/>
-<meta name="dtb:maxPageNumber" content="0"/>
-</head>
-<docTitle><text>Title</text></docTitle>
-<docAuthor><text>Author</text></docAuthor>
-<navMap>')
-
-      chapters = 0
-      toc.each do |section|
-        ch = section['section']
-        next unless (chapters > 0 || ch['name'].to_s =~ /Introduction/i)
-
-        chapters += 1
-        ncx.puts('<navPoint class="chapter" id="' + ch['id'].to_s + '" playOrder="' + (chapters).to_s + '">')
-        # else
-        #   ncx.puts('<navPoint class="chapter">')
-        # end
-        ncx.puts('<navLabel><text>' + ch['name'].to_s + '</text></navLabel>')
-        ncx.puts('<content src="book.html#' + ch['id'].to_s + '"/>')
-        ncx.puts('</navPoint>')
-      end
-      ncx.puts('</navMap></ncx>')
-      ncx.close
-    end
-
-    def build_opf
-      opf_template = liquid_template('book.opf')
-      File.open('book.opf', 'w+') do |f|
-        lang   = @config['language'] || 'en'
-        author = @config['author'] || 'Author'
-        cover  = @config['cover'] || 'images/cover.jpg'
-        data = {'title'    => book_title,
-                'language' => lang,
-                'author'   => author,
-                'pubdate'  => Time.now.strftime("%Y-%m-%d"),
-                'cover_image' => cover}
-        f.puts opf_template.render( data )
-      end
-    end
 
     def liquid_template(file)
       template_dir = File.join(SCRIBE_ROOT, 'site', 'default')
