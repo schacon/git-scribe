@@ -90,6 +90,13 @@ class GitScribe
       @done['mobi'] = true
     end
 
+    def do_ebook
+      do_pdf
+      do_epub
+      do_mobi
+      zip_ebook
+    end
+
     def do_html
       return true if @done['html']
       info "GENERATING HTML"
@@ -301,6 +308,17 @@ _EOM
       Dir.chdir('book.epub.d') do
         ex("zip ../book_for_mobi.epub . -r")
       end
+    end
+
+    def zip_ebook
+      file_name = book_title.downcase.gsub(/\s+/, '_')
+
+      Dir.mkdir(file_name) rescue nil
+      FileUtils.cp 'book.pdf', "#{file_name}/#{file_name}.pdf"
+      FileUtils.cp 'book.epub', "#{file_name}/#{file_name}.epub"
+      FileUtils.cp 'book.mobi', "#{file_name}/#{file_name}.mobi"
+
+      ex("zip #{file_name}.zip #{file_name} -r")
     end
 
     def book_title
