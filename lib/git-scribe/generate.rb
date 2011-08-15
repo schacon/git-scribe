@@ -1,5 +1,7 @@
 class GitScribe
   module Generate
+    WD = Dir.getwd
+
     # generate the new media
     def gen(args = [])
       @done = {}  # what we've generated already
@@ -7,8 +9,6 @@ class GitScribe
 
       type = first_arg(args) || 'all'
       prepare_output_dir
-
-      gather_and_process
 
       types = type == 'all' ? OUTPUT_TYPES : [type]
 
@@ -111,28 +111,24 @@ class GitScribe
 
     def do_site
       info "GENERATING SITE"
-      # TODO: check if html was already done
-      ex("asciidoc -b docbook #{BOOK_FILE}")
-      xsldir = base('docbook-xsl/xhtml')
-      ex("xsltproc --stringparam html.stylesheet stylesheets/scribe.css --nonet #{xsldir}/chunk.xsl book.xml")
 
-      clean_site
-    end
+      prepare_output_dir("site")
+      Dir.chdir("site") do
+        ex("asciidoc -b docbook #{BOOK_FILE}")
+        xsldir = base('docbook-xsl/xhtml')
+        ex("xsltproc --stringparam html.stylesheet stylesheets/scribe.css --nonet #{xsldir}/chunk.xsl book.xml")
 
-    private
-    def prepare_output_dir
-      Dir.mkdir('output') rescue nil
-      Dir.chdir('output') do
-        Dir.mkdir('stylesheets') rescue nil
-        from_stdir = File.join(SCRIBE_ROOT, 'stylesheets')
-        FileUtils.cp_r from_stdir, '.'
+        clean_site
       end
     end
 
-    # create a new file by concatenating all the ones we find
-    def gather_and_process
-      files = Dir.glob("book/*")
-      FileUtils.cp_r files, 'output'
+    private
+    def prepare_output_dir(dir='output')
+      Dir.mkdir(dir) rescue nil
+      FileUtils.cp_r Dir.glob("#{WD}/book/*"), dir
+
+      Dir.mkdir("#{dir}/stylesheets") rescue nil
+      FileUtils.cp_r File.join(SCRIBE_ROOT, 'stylesheets'), dir
     end
 
     def clean_up
