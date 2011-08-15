@@ -1,11 +1,10 @@
 class GitScribe
   module Generate
-    WD = Dir.getwd
-
     # generate the new media
     def gen(args = [])
       @done = {}  # what we've generated already
       @remove_when_done = []
+      @wd = Dir.getwd
 
       type = first_arg(args) || 'all'
       prepare_output_dir
@@ -125,7 +124,7 @@ class GitScribe
     private
     def prepare_output_dir(dir='output')
       Dir.mkdir(dir) rescue nil
-      FileUtils.cp_r Dir.glob("#{WD}/book/*"), dir
+      FileUtils.cp_r Dir.glob("#{@wd}/book/*"), dir
 
       Dir.mkdir("#{dir}/stylesheets") rescue nil
       FileUtils.cp_r File.join(SCRIBE_ROOT, 'stylesheets'), dir

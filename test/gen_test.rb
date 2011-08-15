@@ -32,8 +32,8 @@ context "scribe gen tests" do
     in_temp_dir do
       @scribe.init('t')
       Dir.chdir('t') do
-      file = @scribe.gen('html')
-        assert_equal 'book.html', file
+        ret = @scribe.gen('html')
+        assert_equal true, ret
         out = Dir.glob('output/**/*')
         assert out.include? 'output/book.html'
         assert out.include? 'output/images'
@@ -46,13 +46,13 @@ context "scribe gen tests" do
     in_temp_dir do
       @scribe.init('t')
       Dir.chdir('t') do
-        data = @scribe.gen('site')
+        @scribe.gen('site')
         out = Dir.glob('output/**/*')
-        assert out.include? 'output/index.html'
-        assert out.include? 'output/the_first_chapter.html'
-        assert out.include? 'output/the_second_chapter.html'
-        assert out.include? 'output/images'
-        assert out.include? 'output/stylesheets/scribe.css'
+        assert out.include? 'output/site/index.html'
+        assert out.include? 'output/site/the_first_chapter.html'
+        assert out.include? 'output/site/the_second_chapter.html'
+        assert out.include? 'output/site/images'
+        assert out.include? 'output/site/stylesheets/scribe.css'
       end
     end
   end
@@ -73,8 +73,8 @@ context "scribe gen tests" do
     in_temp_dir do
       @scribe.init('t')
       Dir.chdir('t') do
-        data = @scribe.gen('pdf')
-        assert_equal data, 'book.pdf'
+        ret = @scribe.gen('pdf')
+        assert_equal true, ret
         out = Dir.glob('output/**/*')
         assert out.include? 'output/book.pdf'
       end
@@ -97,8 +97,8 @@ context "scribe gen tests" do
     in_temp_dir do
       @scribe.init('t')
       Dir.chdir('t') do
-      data = @scribe.gen('epub')
-        assert_equal 'book.epub', data
+        ret = @scribe.gen('epub')
+        assert_equal true, ret
         out = Dir.glob('output/**/*')
         assert out.include? 'output/book.epub'
       end
@@ -109,8 +109,8 @@ context "scribe gen tests" do
     in_temp_dir do
       @scribe.init('t')
       Dir.chdir('t') do
-      data = @scribe.gen('mobi')
-        assert_equal data, 'book.mobi'
+        ret = @scribe.gen('mobi')
+        assert_equal true, ret
         out = Dir.glob('output/**/*')
         assert out.include? 'output/book.mobi'
       end
