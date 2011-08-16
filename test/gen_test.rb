@@ -105,6 +105,19 @@ context "scribe gen tests" do
     end
   end
 
+  test "scribe generates an epub with a cover" do
+    in_temp_dir do
+      @scribe.init('t')
+      Dir.chdir('t') do
+        ret = @scribe.gen('epub')
+        assert_equal true, ret
+        `unzip output/book.epub 2>&1 > /dev/null`
+        opf = File.read('OEBPS/content.opf')
+        assert opf.include? 'id="cover-image" href="images/cover.jpg"'
+      end
+    end
+  end
+
   test "scribe can generate a mobi" do
     in_temp_dir do
       @scribe.init('t')
@@ -113,6 +126,35 @@ context "scribe gen tests" do
         assert_equal true, ret
         out = Dir.glob('output/**/*')
         assert out.include? 'output/book.mobi'
+      end
+    end
+  end
+
+  test "scribe generates a mobi with a cover and TOC" do
+    in_temp_dir do
+      @scribe.init('t')
+      Dir.chdir('t') do
+        ret = @scribe.gen('mobi')
+        assert_equal true, ret
+        `unzip output/book.mobi 2>&1 > /dev/null`
+        opf = File.read('OEBPS/content.opf')
+        assert opf.include? 'id="cover-image" href="images/cover.jpg"'
+        assert opf.include? 'href="toc.html" type="toc"'
+      end
+    end
+  end
+
+  test "scribe can generate an ebook ZIP" do
+    in_temp_dir do
+      @scribe.init('t')
+      Dir.chdir('t') do
+        ret = @scribe.gen('ebook')
+        assert_equal true, ret
+        out = Dir.glob('output/**/*')
+        assert out.include? 'output/book_title/book_title.mobi'
+        assert out.include? 'output/book_title/book_title.epub'
+        assert out.include? 'output/book_title/book_title.pdf'
+        assert out.include? 'output/book_title.zip'
       end
     end
   end
