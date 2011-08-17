@@ -43,14 +43,14 @@ class GitScribe
       info "GENERATING PDF"
       do_docbook
       # TODO: syntax highlighting (fop?)
+      # TODO: start chapters on the recto page
+      # (initial.page.number=auto-odd? break.before=page-even?)
       strparams = {'callout.graphics' => 0,
                    'navig.graphics' => 0,
                    'admon.textlabel' => 1,
                    'admon.graphics' => 0,
                    'page.width' => '7.5in',
-                   'page.height' => '9in',
-                   'initial-page-number' => 'auto-odd'
-      }
+                   'page.height' => '9in'}
       param = strparams.map { |k, v| "--stringparam #{k} #{v}" }.join(' ')
       cmd = "xsltproc  --nonet #{param} --output #{local('book.fo')} #{base('docbook-xsl/fo.xsl')} #{local('book.xml')}"
       ex(cmd)
