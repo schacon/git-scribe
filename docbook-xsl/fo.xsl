@@ -16,11 +16,16 @@
 <xsl:import href="http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl"/>
 <xsl:import href="common.xsl"/>
 
+<!-- Include source syntax highlighting -->
+<xsl:import href="highlighting/common.xsl"/>
+<!-- This contains the default source highlight styling rules -->
+<xsl:import href="fo/highlight.xsl"/>
+
 <xsl:param name="fop1.extensions" select="1" />
 <xsl:param name="variablelist.as.blocks" select="1" />
 
-<xsl:param name="paper.type" select="'A4'"/>
 <!--
+<xsl:param name="paper.type" select="'A4'"/>
 <xsl:param name="paper.type" select="'USletter'"/>
 -->
 <xsl:param name="hyphenate">false</xsl:param>
@@ -30,7 +35,7 @@
 <xsl:param name="body.font.family" select="'serif'"/>
 <xsl:param name="body.font.master">12</xsl:param>
 <xsl:param name="body.font.size">
- <xsl:value-of select="$body.font.master"/><xsl:text>pt</xsl:text>
+  <xsl:value-of select="$body.font.master"/><xsl:text>pt</xsl:text>
 </xsl:param>
 
 <xsl:param name="body.margin.bottom" select="'0.5in'"/>
@@ -42,6 +47,60 @@
 
 <!-- Default fetches image from Internet (long timeouts) -->
 <xsl:param name="draft.watermark.image" select="''"/>
+
+<!-- Front cover -->
+<xsl:template name="front.cover">
+  <xsl:call-template name="page.sequence">
+    <xsl:with-param name="master-reference">my-titlepage</xsl:with-param>
+    <xsl:with-param name="content">
+      <fo:block text-align="center">
+        <fo:external-graphic src="url(images/cover.jpg)" content-height="9in"/>
+      </fo:block>
+    </xsl:with-param>
+  </xsl:call-template>
+</xsl:template>
+
+<xsl:template name="select.user.pagemaster">
+  <xsl:param name="element"/>
+  <xsl:param name="pageclass"/>
+  <xsl:param name="default-pagemaster"/>
+
+  <!-- Return my customized title page master name if for titlepage,
+       otherwise return the default -->
+
+  <xsl:choose>
+    <xsl:when test="$default-pagemaster = 'titlepage-first'">
+      <xsl:value-of select="'my-titlepage'" />
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="$default-pagemaster"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
+<xsl:template name="user.pagemasters">
+
+  <!-- my title page -->
+  <fo:simple-page-master master-name="my-titlepage"
+                         page-width="{$page.width}"
+                         page-height="{$page.height}"
+                         margin-top="0"
+                         margin-bottom="0"
+                         margin-left="0"
+                         margin-right="0">
+    <xsl:if test="$axf.extensions != 0">
+      <xsl:call-template name="axf-page-master-properties">
+        <xsl:with-param name="page.master">my-titlepage</xsl:with-param>
+      </xsl:call-template>
+    </xsl:if>
+    <fo:region-body margin-bottom="{$body.margin.bottom}"
+                    margin-top="0"
+                    column-gap="{$column.gap.titlepage}"
+                    column-count="{$column.count.titlepage}">
+    </fo:region-body>
+  </fo:simple-page-master>
+
+</xsl:template>
 
 <!-- Line break -->
 <xsl:template match="processing-instruction('asciidoc-br')">

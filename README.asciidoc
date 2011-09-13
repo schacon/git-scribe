@@ -63,9 +63,16 @@ This will set up the outline for your book.  All the book content goes into the 
 
 Then you can generate your book content with the 'git scribe gen' command:
 
-    $ git scribe gen [site|html|pdf|epub|mobi|all]
+    $ git scribe gen [site|html|pdf|epub|mobi|ebook|all]
 
 Eventually, simply pushing to GitHub will take care of this for you.  For now you can test this auto-generation from the site http://gitscribe.com.  Adding that URL as a post receive hook on your github project will make it try to auto-generate content on push.
+
+*UPDATED:* Just added is the ability to create ZIP file containing the three formats needed to publish an ebook (PDF, EPUB, and MOBI).  This feature will create a ZIP named after the title of your book ("The SPDY Book" produces `the_spdy_book.zip`).  To do this, generate an "ebook":
+
+    $ git scribe gen ebook
+
+_n.b._ This may change in the future.
+
 
 Roadmap
 =======
