@@ -2,16 +2,14 @@ dir = File.dirname(File.expand_path(__FILE__))
 $LOAD_PATH.unshift dir + '/../lib'
 $TESTING = true
 
-require 'test/unit'
+# Necessary to override stdlib: http://www.ruby-forum.com/topic/212974
 require 'rubygems'
+gem 'test-unit'
+require 'test/unit'
+
 require 'git-scribe'
 require 'pp'
 require 'tempfile'
-
-begin
-  require 'leftright'
-rescue LoadError
-end
 
 ##
 # test/spec/mini 3
