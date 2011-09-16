@@ -10,7 +10,7 @@ context "scribe check tests" do
     assert_equal status.size, 6
   end
 
-  # there no option '-version' for apache fop cli
+  # there no option '-failboat' for apache fop cli
   # it accepts only '-v' option but doesn't exit immediately.
   # it should be additional no-op flag provided (like '-out list')
   #
@@ -18,6 +18,6 @@ context "scribe check tests" do
   test "scribe should correctly check fop availability" do
     assert_equal @scribe.check_can_run('fop -v -out list'), true
     assert_equal @scribe.check_can_run('fop -v'), false
-    assert_equal @scribe.check_can_run('fop -version'), false
+    assert_equal @scribe.check_can_run('fop -failboat'), false
   end
 end

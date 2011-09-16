@@ -20,7 +20,7 @@ context "scribe gen tests" do
         out = Dir.glob('output/**/*')
         assert out.include? 'output/book.html'
         assert out.include? 'output/image'
-        assert out.include? 'output/stylesheets/handbookish.css'
+        assert out.include? 'output/stylesheets/scribe.css'
       end
     end
   end
@@ -35,7 +35,7 @@ context "scribe gen tests" do
         assert out.include? 'output/the_first_chapter.html'
         assert out.include? 'output/the_second_chapter.html'
         assert out.include? 'output/image'
-        assert out.include? 'output/stylesheets/handbookish.css'
+        assert out.include? 'output/stylesheets/scribe.css'
       end
     end
   end
@@ -52,12 +52,24 @@ context "scribe gen tests" do
     end
   end
 
+  test "scribe can generate a pdf with syntax highlighting" do
+    in_temp_dir do
+      @scribe.init('t')
+      Dir.chdir('t') do
+        data = @scribe.gen('pdf')
+        fo = Nokogiri::XML(File.read('output/book.fo'))
+        fo.remove_namespaces!
+        assert fo.at_css "inline[font-weight=bold][color=blue]:contains('char')"
+      end
+    end
+  end
+
   test "scribe can generate a epub" do
     in_temp_dir do
       @scribe.init('t')
       Dir.chdir('t') do
       data = @scribe.gen('epub')
-        assert_equal data, 'book.epub'
+        assert_equal 'book.epub', data
         out = Dir.glob('output/**/*')
         assert out.include? 'output/book.epub'
       end

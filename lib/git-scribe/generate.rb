@@ -42,7 +42,7 @@ class GitScribe
     end
 
     def a2x_wss(type)
-      a2x(type) + " --stylesheet=stylesheets/handbookish.css"
+      a2x(type) + " --stylesheet=stylesheets/scribe.css"
     end
 
     def do_docbook
@@ -57,17 +57,24 @@ class GitScribe
     def do_pdf
       info "GENERATING PDF"
       do_docbook
-      # TODO: syntax highlighting (fop?)
-      strparams = {'callout.graphics' => 0,
-                   'navig.graphics' => 0,
-                   'admon.textlabel' => 1,
-                   'admon.graphics' => 0}
-      param = strparams.map { |k, v| "--stringparam #{k} #{v}" }.join(' ')
-      cmd = "xsltproc  --nonet #{param} --output #{local('book.fo')} #{base('docbook-xsl/fo.xsl')} #{local('book.xml')}"
-      ex(cmd)
-      cmd = "fop -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
-      ex(cmd)
-      if $?.exitstatus == 0
+
+      params = {
+        'callout.graphics'        => 0,
+        'navig.graphics'          => 0,
+        'admon.textlabel'         => 1,
+        'admon.graphics'          => 0,
+      }.map { |k, v| "-D#{k}=#{v}" }.join(' ')
+
+      ex <<-SH
+        java -cp "#{base('vendor/saxon.jar')}:#{base('vendor/xslthl-2.0.2.jar')}" \
+             #{params} \
+             com.icl.saxon.StyleSheet \
+             -o #{local('book.fo')} \
+             #{local('book.xml')} #{base('docbook-xsl/fo.xsl')}
+      SH
+      ex "fop -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
+
+      if $?.success?
         'book.pdf'
       end
     end
@@ -109,7 +116,7 @@ class GitScribe
       # TODO: check if html was already done
       ex("asciidoc -b docbook #{BOOK_FILE}")
       xsldir = base('docbook-xsl/xhtml')
-      ex("xsltproc --stringparam html.stylesheet stylesheets/handbookish.css --nonet #{xsldir}/chunk.xsl book.xml")
+      ex("xsltproc --stringparam html.stylesheet stylesheets/scribe.css --nonet #{xsldir}/chunk.xsl book.xml")
 
       source = File.read('index.html')
       html = Nokogiri::HTML.parse(source, nil, 'utf-8')
@@ -336,8 +343,7 @@ class GitScribe
     def ex(command)
       out = `#{command} 2>&1`
       info out
-      $?.exitstatus == 0
+      $?.success?
     end
-
   end
 end

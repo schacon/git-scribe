@@ -8,11 +8,12 @@ end
 
 task :default => :test
 
-desc "Run the test suite"
-task :test do
-  sh('turn test/**/*_test.rb')
+require 'rake/testtask'
+Rake::TestTask.new do |t|
+  t.libs << "test"
+  t.test_files = FileList['test/*_test.rb']
+  t.verbose = true
 end
-
 
 #
 # Publishing
