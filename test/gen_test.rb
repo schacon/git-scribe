@@ -29,7 +29,7 @@ context "scribe gen tests" do
     in_temp_dir do
       @scribe.init('t')
       Dir.chdir('t') do
-      data = @scribe.gen('site')
+        data = @scribe.gen('site')
         out = Dir.glob('output/**/*')
         assert out.include? 'output/index.html'
         assert out.include? 'output/the_first_chapter.html'
@@ -40,11 +40,23 @@ context "scribe gen tests" do
     end
   end
 
+  test "scribe can generate site with syntax highlighting" do
+    in_temp_dir do
+      @scribe.init('t')
+      Dir.chdir('t') do
+        @scribe.gen('site')
+        html = Nokogiri::HTML(File.read('output/the_first_chapter.html'))
+        assert html.at_css "b:contains('char')"
+      end
+    end
+  end
+
+
   test "scribe can generate a pdf" do
     in_temp_dir do
       @scribe.init('t')
       Dir.chdir('t') do
-      data = @scribe.gen('pdf')
+        data = @scribe.gen('pdf')
         assert_equal data, 'book.pdf'
         out = Dir.glob('output/**/*')
         assert out.include? 'output/book.pdf'
@@ -56,7 +68,7 @@ context "scribe gen tests" do
     in_temp_dir do
       @scribe.init('t')
       Dir.chdir('t') do
-        data = @scribe.gen('pdf')
+        @scribe.gen('pdf')
         fo = Nokogiri::XML(File.read('output/book.fo'))
         fo.remove_namespaces!
         assert fo.at_css "inline[font-weight=bold][color=blue]:contains('char')"

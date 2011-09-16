@@ -115,8 +115,13 @@ class GitScribe
       info "GENERATING SITE"
       # TODO: check if html was already done
       ex("asciidoc -b docbook #{BOOK_FILE}")
-      xsldir = base('docbook-xsl/xhtml')
-      ex("xsltproc --stringparam html.stylesheet stylesheets/scribe.css --nonet #{xsldir}/chunk.xsl book.xml")
+
+      ex <<-SH
+        java -cp "#{base('vendor/saxon.jar')}:#{base('vendor/xslthl-2.0.2.jar')}" \
+             -Dhtml.stylesheet=1 \
+             com.icl.saxon.StyleSheet \
+             book.xml #{base('docbook-xsl/xhtml/chunk.xsl')}
+      SH
 
       source = File.read('index.html')
       html = Nokogiri::HTML.parse(source, nil, 'utf-8')

@@ -191,8 +191,8 @@ set       toc,title
 <xsl:param name="graphicsize.use.img.src.path" select="0"/>
 <xsl:param name="header.rule" select="1"/>
 <xsl:param name="highlight.default.language"/>
-<xsl:param name="highlight.source" select="0"/>
-<xsl:param name="highlight.xslthl.config"/>
+<xsl:param name="highlight.source" select="1"/>
+<xsl:param name="highlight.xslthl.config">file:///usr/local/Cellar/docbook/5.0/docbook/xsl/1.76.1/highlighting/xslthl-config.xml</xsl:param>
 <xsl:param name="html.append"/>
 <xsl:param name="html.base"/>
 <xsl:param name="html.cellpadding"/>
