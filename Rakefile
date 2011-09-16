@@ -24,9 +24,9 @@ task :publish do
   require 'git-scribe/version'
 
   sh "gem build git-scribe.gemspec"
-  sh "gem push git-scribe-#{GitScribe::Version}.gem"
-  sh "git tag v#{GitScribe::Version}"
-  sh "git push origin v#{GitScribe::Version}"
+  sh "gem push git-scribe-#{GitScribe::VERSION}.gem"
+  sh "git tag v#{GitScribe::VERSION}"
+  sh "git push origin v#{GitScribe::VERSION}"
   sh "git push origin master"
 end
 
