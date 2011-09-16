@@ -42,7 +42,7 @@ class GitScribe
     end
 
     def a2x_wss(type)
-      a2x(type) + " --stylesheet=stylesheets/handbookish.css"
+      a2x(type) + " --stylesheet=stylesheets/scribe.css"
     end
 
     def do_docbook
@@ -109,7 +109,7 @@ class GitScribe
       # TODO: check if html was already done
       ex("asciidoc -b docbook #{BOOK_FILE}")
       xsldir = base('docbook-xsl/xhtml')
-      ex("xsltproc --stringparam html.stylesheet stylesheets/handbookish.css --nonet #{xsldir}/chunk.xsl book.xml")
+      ex("xsltproc --stringparam html.stylesheet stylesheets/scribe.css --nonet #{xsldir}/chunk.xsl book.xml")
 
       source = File.read('index.html')
       html = Nokogiri::HTML.parse(source, nil, 'utf-8')
