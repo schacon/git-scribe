@@ -1,3 +1,4 @@
 example/output
 output
 .DS_Store
+*.gem
