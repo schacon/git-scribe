@@ -58,20 +58,13 @@ class GitScribe
       info "GENERATING PDF"
       do_docbook
 
-      params = {
-        'callout.graphics'        => 0,
-        'navig.graphics'          => 0,
-        'admon.textlabel'         => 1,
-        'admon.graphics'          => 0,
-      }.map { |k, v| "-D#{k}=#{v}" }.join(' ')
-
-      ex <<-SH
-        java -cp "#{base('vendor/saxon.jar')}:#{base('vendor/xslthl-2.0.2.jar')}" \
-             #{params} \
-             com.icl.saxon.StyleSheet \
-             -o #{local('book.fo')} \
-             #{local('book.xml')} #{base('docbook-xsl/fo.xsl')}
-      SH
+      java_options = {
+        'callout.graphics' => 0,
+        'navig.graphics'   => 0,
+        'admon.textlabel'  => 1,
+        'admon.graphics'   => 0,
+      }
+      run_xslt "-o #{local('book.fo')} #{local('book.xml')} #{base('docbook-xsl/fo.xsl')}", java_options
       ex "fop -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
 
       if $?.success?
@@ -114,14 +107,9 @@ class GitScribe
     def do_site
       info "GENERATING SITE"
       # TODO: check if html was already done
-      ex("asciidoc -b docbook #{BOOK_FILE}")
 
-      ex <<-SH
-        java -cp "#{base('vendor/saxon.jar')}:#{base('vendor/xslthl-2.0.2.jar')}" \
-             -Dhtml.stylesheet=1 \
-             com.icl.saxon.StyleSheet \
-             book.xml #{base('docbook-xsl/xhtml/chunk.xsl')}
-      SH
+      ex "asciidoc -b docbook #{BOOK_FILE}"
+      run_xslt "book.xml #{base('docbook-xsl/xhtml/chunk.xsl')}", "html.stylesheet" => 1
 
       source = File.read('index.html')
       html = Nokogiri::HTML.parse(source, nil, 'utf-8')
@@ -349,6 +337,17 @@ class GitScribe
       out = `#{command} 2>&1`
       info out
       $?.success?
+    end
+
+    private
+
+    def run_xslt(jar_arguments, java_options)
+      ex <<-SH
+        java -cp "#{base('vendor/saxon.jar')}:#{base('vendor/xslthl-2.0.2.jar')}" \
+             #{java_options.map { |k, v| "-D#{k}=#{v}" }.join(' ')} \
+             com.icl.saxon.StyleSheet \
+             #{jar_arguments}
+      SH
     end
   end
 end
