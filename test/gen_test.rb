@@ -52,6 +52,18 @@ context "scribe gen tests" do
     end
   end
 
+  test "scribe can generate a pdf with syntax highlighting" do
+    in_temp_dir do
+      @scribe.init('t')
+      Dir.chdir('t') do
+        data = @scribe.gen('pdf')
+        fo = Nokogiri::XML(File.read('output/book.fo'))
+        fo.remove_namespaces!
+        assert fo.at_css "inline[font-weight=bold][color=blue]:contains('char')"
+      end
+    end
+  end
+
   test "scribe can generate a epub" do
     in_temp_dir do
       @scribe.init('t')
