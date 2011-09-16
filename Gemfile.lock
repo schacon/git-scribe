@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    git-scribe (0.0.9)
+    git-scribe (0.1.0)
       liquid
       nokogiri
 
