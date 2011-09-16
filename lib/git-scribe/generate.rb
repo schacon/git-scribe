@@ -74,7 +74,7 @@ class GitScribe
       SH
       ex "fop -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
 
-      if $?.exitstatus == 0
+      if $?.success?
         'book.pdf'
       end
     end
@@ -343,7 +343,7 @@ class GitScribe
     def ex(command)
       out = `#{command} 2>&1`
       info out
-      $?.exitstatus == 0
+      $?.success?
     end
   end
 end

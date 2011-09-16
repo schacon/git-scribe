@@ -65,7 +65,7 @@ class GitScribe
 
     def check_can_run(command)
       `#{command} 2>&1`
-      $?.exitstatus == 0
+      $?.success?
     end
   end
 end
