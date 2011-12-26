@@ -86,6 +86,11 @@ class GitScribe
       cmd = "kindlegen -verbose book_for_mobi.epub -o book.mobi"
       return false unless ex(cmd)
 
+      cmd = @wd +  '/scripts/post-mobi.sh'
+      if File.exists?(cmd) && File.executable?(cmd)
+        return false unless ex(cmd)
+      end
+
       @done['mobi'] = true
     end
 
