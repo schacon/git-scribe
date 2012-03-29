@@ -74,9 +74,8 @@ class GitScribe
 
     def do_epub
       info "GENERATING EPUB"
-      generate_docinfo
       # TODO: look for custom stylesheets
-      cmd = "#{a2x_wss('epub')} -a docinfo -v #{BOOK_FILE}"
+      cmd = "#{a2x_wss('epub')} -v #{BOOK_FILE}"
       if ex(cmd)
         'book.epub'
       end
@@ -100,17 +99,8 @@ class GitScribe
       styledir = local('stylesheets')
       cmd = "asciidoc -a stylesdir=#{styledir} -a theme=scribe #{BOOK_FILE}"
       if ex(cmd)
-        remove_p_from_li('book.html') # Makes mobi on Kindle look dramatically better
         @done['html'] == true
         'book.html'
-      end
-    end
-
-    # Search the final content file and remove p tags from li tags for Kindle appearance improvement (hack)
-    def remove_p_from_li(file)
-      content = File.read(file)
-      File.open(file, 'w') do |f|
-        f.write content.gsub(%r"<li>\s*<p>\s*(.+?)\s+</p>\s*</li>"m, '<li>\1</li>')
       end
     end
 
@@ -175,7 +165,7 @@ class GitScribe
       page_template = liquid_template('page.html')
 
       # write the index page
-      main_data = {
+      main_data = { 
         'book_title' => book_title,
         'sections' => sections
       }
@@ -185,7 +175,7 @@ class GitScribe
 
       # write the title page
       File.open('title.html', 'w+') do |f|
-        data = {
+        data = { 
           'title' => sections.first['title'],
           'sub' => sections.first['sub'],
           'prev' => {'link' => 'index.html', 'title' => "Main"},
@@ -214,7 +204,7 @@ class GitScribe
             if i <= sections.size
               next_section = sections[i+1]
             end
-            data = {
+            data = { 
               'title' => section['title'],
               'sub' => section['sub'],
               'prev' => sections[i-1],
@@ -238,33 +228,20 @@ class GitScribe
       sections
     end
 
-    def generate_docinfo
-      docinfo_template = liquid_template('book-docinfo.xml')
-      File.open('book-docinfo.xml', 'w+') do |f|
-        cover  = @config['cover'] || 'images/cover.jpg'
-        data = {'title'       => book_title,
-                'cover_image' => cover}
-        f.puts docinfo_template.render( data )
-      end
-    end
-
-    def book_title
-      do_html
-
-      source = File.read("book.html")
-      t = /\<title>(.*?)<\/title\>/.match(source)
-
-      t ? t[1] : 'Title'
-    end
-
     def generate_toc_files
       # read book table of contents
       toc = []
       source = File.read("book.html")
 
+      # get the book title
+      book_title = 'Title'
+      if t = /\<title>(.*?)<\/title\>/.match(source)
+        book_title = t[0]
+      end
+
       source.scan(/\<h([2|3]) id=\"(.*?)\"\>(.*?)\<\/h[2|3]\>/).each do |header|
         sec = {'id' => header[1], 'name' => header[2]}
-        if header[0] == '2'
+        if header[0] == '2' 
           toc << {'section' => sec, 'subsections' => []}
         else
           toc[toc.size - 1]['subsections'] << sec
@@ -333,7 +310,7 @@ class GitScribe
       File.open('book.opf', 'w+') do |f|
         lang   = @config['language'] || 'en'
         author = @config['author'] || 'Author'
-        cover  = @config['cover'] || 'images/cover.jpg'
+        cover  = @config['cover'] || 'image/cover.jpg'
         data = {'title'    => book_title,
                 'language' => lang,
                 'author'   => author,
@@ -364,9 +341,21 @@ class GitScribe
 
     private
 
+    def windows?
+      RbConfig::CONFIG['host_os'] =~ /mswin|windows|mingw|cygwin/i
+    end
+    
+    def classpath_delimiter
+      if windows?
+        ";"
+      else
+        ":"
+      end
+    end
+
     def run_xslt(jar_arguments, java_options)
       ex <<-SH
-        java -cp "#{base('vendor/saxon.jar')}:#{base('vendor/xslthl-2.0.2.jar')}" \
+        java -cp "#{base('vendor/saxon.jar')}#{classpath_delimiter}#{base('vendor/xslthl-2.0.2.jar')}" \
              -Dxslthl.config=file://"#{base('docbook-xsl/highlighting/xslthl-config.xml')}" \
              #{java_options.map { |k, v| "-D#{k}=#{v}" }.join(' ')} \
              com.icl.saxon.StyleSheet \
