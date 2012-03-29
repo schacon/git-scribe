@@ -99,8 +99,17 @@ class GitScribe
       styledir = local('stylesheets')
       cmd = "asciidoc -a stylesdir=#{styledir} -a theme=scribe #{BOOK_FILE}"
       if ex(cmd)
+        remove_p_from_li('book.html') # Makes mobi on Kindle look dramatically better
         @done['html'] == true
         'book.html'
+      end
+    end
+
+    # Search the final content file and remove p tags from li tags for Kindle appearance improvement (hack)
+    def remove_p_from_li(file)
+      content = File.read(file)
+      File.open(file, 'w') do |f|
+        f.write content.gsub(%r"<li>\s*<p>\s*(.+?)\s+</p>\s*</li>"m, '<li>\1</li>')
       end
     end
 
