@@ -17,8 +17,6 @@
 <xsl:import href="common.xsl"/>
 
 <xsl:import href="fo/verbatim.xsl"/>
-<xsl:param name="highlight.source" select="1"></xsl:param>
-<xsl:param name="highlight.xslthl.config">file:///usr/local/Cellar/docbook/5.0/docbook/xsl/1.76.1/highlighting/xslthl-config.xml</xsl:param>
 
 <xsl:attribute-set name="monospace.verbatim.properties">
   <xsl:attribute name="keep-together.within-column">always</xsl:attribute>
