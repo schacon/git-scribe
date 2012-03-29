@@ -74,8 +74,9 @@ class GitScribe
 
     def do_epub
       info "GENERATING EPUB"
+      generate_docinfo
       # TODO: look for custom stylesheets
-      cmd = "#{a2x_wss('epub')} -v #{BOOK_FILE}"
+      cmd = "#{a2x_wss('epub')} -a docinfo -v #{BOOK_FILE}"
       if ex(cmd)
         'book.epub'
       end
@@ -237,16 +238,29 @@ class GitScribe
       sections
     end
 
+    def generate_docinfo
+      docinfo_template = liquid_template('book-docinfo.xml')
+      File.open('book-docinfo.xml', 'w+') do |f|
+        cover  = @config['cover'] || 'images/cover.jpg'
+        data = {'title'       => book_title,
+                'cover_image' => cover}
+        f.puts docinfo_template.render( data )
+      end
+    end
+
+    def book_title
+      do_html
+
+      source = File.read("book.html")
+      t = /\<title>(.*?)<\/title\>/.match(source)
+
+      t ? t[1] : 'Title'
+    end
+
     def generate_toc_files
       # read book table of contents
       toc = []
       source = File.read("book.html")
-
-      # get the book title
-      book_title = 'Title'
-      if t = /\<title>(.*?)<\/title\>/.match(source)
-        book_title = t[0]
-      end
 
       source.scan(/\<h([2|3]) id=\"(.*?)\"\>(.*?)\<\/h[2|3]\>/).each do |header|
         sec = {'id' => header[1], 'name' => header[2]}
