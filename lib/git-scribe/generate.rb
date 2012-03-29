@@ -364,9 +364,21 @@ class GitScribe
 
     private
 
+    def windows?
+      RbConfig::CONFIG['host_os'] =~ /mswin|windows|mingw|cygwin/i
+    end
+    
+    def classpath_delimiter
+      if windows?
+        ";"
+      else
+        ":"
+      end
+    end
+
     def run_xslt(jar_arguments, java_options)
       ex <<-SH
-        java -cp "#{base('vendor/saxon.jar')}:#{base('vendor/xslthl-2.0.2.jar')}" \
+        java -cp "#{base('vendor/saxon.jar')}#{classpath_delimiter}#{base('vendor/xslthl-2.0.2.jar')}" \
              #{java_options.map { |k, v| "-D#{k}=#{v}" }.join(' ')} \
              com.icl.saxon.StyleSheet \
              #{jar_arguments}
