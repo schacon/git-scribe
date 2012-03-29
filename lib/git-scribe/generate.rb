@@ -99,8 +99,16 @@ class GitScribe
       styledir = local('stylesheets')
       cmd = "asciidoc -a stylesdir=#{styledir} -a theme=scribe #{BOOK_FILE}"
       if ex(cmd)
+        remove_p_from_li('book.html')
         @done['html'] == true
         'book.html'
+      end
+    end
+
+    def remove_p_from_li(file)
+      content = File.read(file)
+      File.open(file, 'w') do |f|
+        f.write content.gsub(%r"<li>\s*<p>\s*(.+?)\s+</p>\s*</li>"m, '<li>\1</li>')
       end
     end
 
