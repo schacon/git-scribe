@@ -129,7 +129,7 @@ class GitScribe
     private
     def prepare_output_dir(dir='output')
       Dir.mkdir(dir) rescue nil
-      FileUtils.cp_r Dir.glob("#{@wd}/book/*"), dir
+      FileUtils.cp_r "#{@wd}/book/.", dir, :remove_destination => true
 
       Dir.mkdir("#{dir}/stylesheets") rescue nil
       FileUtils.cp_r File.join(SCRIBE_ROOT, 'stylesheets'), dir
