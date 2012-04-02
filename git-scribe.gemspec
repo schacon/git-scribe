@@ -5,9 +5,7 @@ files = `git ls-files`.
   split("\n").
   sort
 
-puts files
-
-  # piece file back together and write...
+# piece file back together and write...
 Gem::Specification.new do |s|
   s.name              = "git-scribe"
   s.version           = GitScribe::VERSION
