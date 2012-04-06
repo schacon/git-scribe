@@ -330,7 +330,7 @@ class GitScribe
     # create a new file by concatenating all the ones we find
     def gather_and_process
       files = Dir.glob("book/*")
-      FileUtils.cp_r files, 'output'
+      FileUtils.cp_r files, 'output', :remove_destination => true
     end
 
     def ex(command)
