@@ -36,7 +36,7 @@ context "scribe gen tests" do
         assert_equal 'book.html', file
         out = Dir.glob('output/**/*')
         assert out.include? 'output/book.html'
-        assert out.include? 'output/image'
+        assert out.include? 'output/images'
         assert out.include? 'output/stylesheets/scribe.css'
       end
     end
@@ -51,7 +51,7 @@ context "scribe gen tests" do
         assert out.include? 'output/index.html'
         assert out.include? 'output/the_first_chapter.html'
         assert out.include? 'output/the_second_chapter.html'
-        assert out.include? 'output/image'
+        assert out.include? 'output/images'
         assert out.include? 'output/stylesheets/scribe.css'
       end
     end
