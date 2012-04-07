@@ -4,3 +4,20 @@
   </imageobject>
   <textobject><phrase>{{title}}</phrase></textobject>
 </mediaobject>
+<mediaobject role="icons">
+  <imageobject>
+    <imagedata fileref="images/icons/note.png" format="PNG"/>
+  </imageobject>
+  <imageobject>
+    <imagedata fileref="images/icons/caution.png" format="PNG"/>
+  </imageobject>
+  <imageobject>
+    <imagedata fileref="images/icons/important.png" format="PNG"/>
+  </imageobject>
+  <imageobject>
+    <imagedata fileref="images/icons/tip.png" format="PNG"/>
+  </imageobject>
+  <imageobject>
+    <imagedata fileref="images/icons/warning.png" format="PNG"/>
+  </imageobject>
+</mediaobject>

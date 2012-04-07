@@ -45,10 +45,10 @@ class GitScribe
       # TODO: syntax highlighting (fop?)
       # TODO: start chapters on the recto page
       # (initial.page.number=auto-odd? break.before=page-even?)
-      strparams = {'callout.graphics' => 0,
-                   'navig.graphics' => 0,
+      strparams = {'callout.graphics' => 1,
+                   'navig.graphics' => 1,
                    'admon.textlabel' => 1,
-                   'admon.graphics' => 0,
+                   'admon.graphics' => 1,
                    'page.width' => '7.5in',
                    'page.height' => '9in'}
       param = strparams.map { |k, v| "--stringparam #{k} #{v}" }.join(' ')
@@ -68,7 +68,7 @@ class GitScribe
 
       generate_docinfo
       # TODO: look for custom stylesheets
-      cmd = "#{a2x_wss('epub')} -a docinfo -k -v #{BOOK_FILE}"
+      cmd = "#{a2x_wss('epub')} -a docinfo -k --icons -r images/icons/note.png -r images/icons/caution.png -r images/icons/important.png -r images/icons/tip.png -r images/icons/warning.png -v #{BOOK_FILE}"
       return false unless ex(cmd)
 
       @done['epub'] = true
@@ -128,11 +128,15 @@ class GitScribe
 
     private
     def prepare_output_dir(dir='output')
-      Dir.mkdir(dir) rescue nil
+      FileUtils.mkdir_p(dir)
       FileUtils.cp_r "#{@wd}/book/.", dir, :remove_destination => true
 
-      Dir.mkdir("#{dir}/stylesheets") rescue nil
+      FileUtils.mkdir_p("#{dir}/stylesheets")
       FileUtils.cp_r File.join(SCRIBE_ROOT, 'stylesheets'), dir
+
+      FileUtils.mkdir_p("#{dir}/images/icons")
+      FileUtils.cp_r File.join(SCRIBE_ROOT, 'icons'),
+                     "#{dir}/images"
     end
 
     def clean_up
