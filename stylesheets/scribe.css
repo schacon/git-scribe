@@ -22,9 +22,10 @@ strong {
 }
 
 pre, tt {
-	font-family:consolas, 'lucida console', 'bitstream vera sans mono',
-	           'courier new', monospace;
-	color:#000;
+  font-family: consolas, 'lucida console', 'bitstream vera sans mono',
+	             'courier new', monospace;
+  color: #000;
+  background-color: #eee;
 }
 
 p, ul, ol, dl {
