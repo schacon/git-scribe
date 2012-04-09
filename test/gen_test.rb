@@ -6,8 +6,13 @@ context "scribe gen tests" do
   end
 
   test "will not respond to non-thing" do
-    assert_raise RuntimeError do
-      @scribe.gen('mofo')
+    in_temp_dir do
+      @scribe.init('t')
+      Dir.chdir('t') do
+        assert_raise RuntimeError do
+          @scribe.gen('mofo')
+        end
+      end
     end
   end
 
@@ -62,7 +67,7 @@ context "scribe gen tests" do
       @scribe.init('t')
       Dir.chdir('t') do
         @scribe.gen('site')
-        html = Nokogiri::HTML(File.read('output/the_first_chapter.html'))
+        html = Nokogiri::HTML(File.read('output/site/the_first_chapter.html'))
         assert html.at_css "b:contains('char')"
       end
     end
