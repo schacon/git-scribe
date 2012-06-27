@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency('nokogiri')
   s.add_dependency('liquid')
+  s.add_dependency('grit')
   s.add_development_dependency("rake")
   s.add_development_dependency("test-unit")
 

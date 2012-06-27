@@ -2,6 +2,7 @@ require 'rubygems'
 require 'nokogiri'
 require 'liquid'
 require 'yaml'
+require 'grit'
 
 require 'git-scribe/generate'
 require 'git-scribe/check'
