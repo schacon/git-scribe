@@ -96,8 +96,8 @@ class GitScribe
       return true if @done['html']
       info "GENERATING HTML"
       # TODO: look for custom stylesheets
-      styledir = local('stylesheets')
-      cmd = "asciidoc -a stylesdir=#{styledir} -a theme=scribe #{BOOK_FILE}"
+      stylesheet = local('stylesheets') + '/scribe.css'
+      cmd = "asciidoc -a stylesheet=#{stylesheet} #{BOOK_FILE}"
       if ex(cmd)
         @done['html'] == true
         'book.html'
