@@ -31,6 +31,7 @@ context "scribe init tests" do
       assert files.include? "t/README.asciidoc"
       assert files.include? "t/.gitscribe"
       assert files.include? "t/.gitignore"
+      assert files.include? "t/.git"
     end
   end
 end
