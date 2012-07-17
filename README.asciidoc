@@ -57,8 +57,10 @@ Check if you have everything installed properly for local generation with `check
 
 If you are on OSX and using Homebrew http://mxcl.github.com/homebrew/ you can install dependencies easily:
 
-    $ brew install asciidoc source-highlight fop
-    $ brew install https://raw.github.com/adamv/homebrew-alt/master/non-free/kindlegen.rb
+----
+$ brew install asciidoc source-highlight fop
+$ brew install https://raw.github.com/adamv/homebrew-alt/master/non-free/kindlegen.rb
+----
 
 Initialize a new book with `init`:
 
