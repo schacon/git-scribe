@@ -231,7 +231,7 @@ _EOM
     end
 
     def add_html_toc_to_opf_manifest(opf)
-      opf.sub(/<item id="ncxtoc".+?>/) { |s|
+      opf.sub(/<item[^>]+id="ncxtoc".+?>/) { |s|
         s + "\n" +
           %q|    <item id="htmltoc" | +
                     %q|media-type="application/xhtml+xml" | +

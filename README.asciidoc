@@ -14,7 +14,7 @@ such, there will never be an official ruby gem. If you really, really
 want this, clone the repository and install with:
 
     gem build git-scribe.gemspec
-    gem install git-scribe-0.0.9.gem
+    gem install git-scribe-0.1.1.gem
 
 
 Git Scribe
