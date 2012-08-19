@@ -6,6 +6,7 @@ require 'yaml'
 require 'git-scribe/generate'
 require 'git-scribe/check'
 require 'git-scribe/init'
+require 'decorator'
 
 require 'fileutils'
 require 'pp'
@@ -28,6 +29,7 @@ class GitScribe
     @args = []
     @options = {}
     @config = YAML::parse(File.open(local('.gitscribe'))).transform rescue {}
+    @decorate = Decorator.new
   end
 
   ## COMMANDS ##

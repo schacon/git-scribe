@@ -2,6 +2,19 @@
   <renderers>
     <renderer mime="application/pdf">
       <fonts>
+
+<font kerning="yes" embed-url="/usr/share/fonts/truetype/liberation/LiberationMono-Italic.ttf">
+    <font-triplet name="LiberationMono" style="italic" weight="normal"/>
+</font>
+
+<font kerning="yes" embed-url="/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf">
+    <font-triplet name="LiberationMono" style="normal" weight="bold"/>
+</font>
+
+<font kerning="yes" embed-url="/usr/share/fonts/truetype/liberation/LiberationMono-BoldItalic.ttf">
+    <font-triplet name="LiberationMono" style="italic" weight="bold"/>
+</font>
+
         <auto-detect/>
       </fonts>
     </renderer>

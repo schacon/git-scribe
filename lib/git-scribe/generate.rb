@@ -43,7 +43,7 @@ class GitScribe
       info "GENERATING PDF"
       do_docbook
 
-      # TODO: mark_programlistings_for_pygments
+      @decorate.docbook
 
       # TODO: start chapters on the recto page
       # (initial.page.number=auto-odd? break.before=page-even?)
@@ -56,15 +56,14 @@ class GitScribe
         'page.height' => '9in',
         'body.font.family' => "'URW Bookman L'",
         'title.font.family' => "'URW Bookman L'",
-        'monospace.font.family' => "'DroidSansMono'"
+        'monospace.font.family' => "'LiberationMono'"
+        # 'monospace.font.family' => "'DroidSansMono'"
       }
       param = strparams.map { |k, v| "--stringparam #{k} #{v}" }.join(' ')
       cmd = "xsltproc  --nonet #{param} --output #{local('book.fo')} #{base('docbook-xsl/fo.xsl')} #{local('book.xml')}"
       ex(cmd)
 
-      # syntax_highlight_for_pdf
-      #   pygmentize_bb
-      #   convert_bb_to_fo
+      @decorate.fop
 
       cmd = "fop -c #{base('docbook-xsl/fop.xconf')} -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
       ex(cmd)
