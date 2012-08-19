@@ -57,7 +57,7 @@ class GitScribe
       param = strparams.map { |k, v| "--stringparam #{k} #{v}" }.join(' ')
       cmd = "xsltproc  --nonet #{param} --output #{local('book.fo')} #{base('docbook-xsl/fo.xsl')} #{local('book.xml')}"
       ex(cmd)
-      cmd = "fop -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
+      cmd = "fop -c #{base('fop.xconf')} -fo #{local('book.fo')} -pdf #{local('book.pdf')}"
       ex(cmd)
 
       return false unless $?.exitstatus == 0
