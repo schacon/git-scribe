@@ -1,0 +1,44 @@
+The general idea is:
+
+In book.xml, convert:
+
+```
+[source,javascript] blah, blah, blah
+```
+
+To:
+
+```
+[source]//javascript
+blah, blah, blah
+```
+
+In book.fo, run pygments on
+
+```
+<fo:block space-before.minimum="0.8em" space-before.optimum="1em" space-before.maximum="1.2em" space-after.minimum="0.8em" space-after.optimum="1em" space-after.maximum="1.2em" hyphenate="false" wrap-option="no-wrap" white-space-collapse="false" white-space-treatment="preserve" linefeed-treatment="preserve" text-align="start" font-family="monospace" font-size="10pt" keep-together.within-column="always" background-color="#E0E0E0" border="0" id="d0e234">//javascript
+// The game area
+var scene = new THREE.Scene();
+```
+
+To get:
+
+```
+$  gamingjs git:(master) ✗ pygmentize -O style=trac -f bb -l javascript book/includes/building_an_avatar/avatar_head.js
+[color=#999988][i]// The game area
+[/i][/color][b]var[/b] scene [b]=[/b] [b]new[/b] THREE.Scene();
+
+[color=#999988][i]// The camera
+[/i][/color][b]var[/b] aspect_ratio [b]=[/b] [color=#999999]window[/color].innerWidth [b]/[/b] [color=#999999]window[/color].innerHeight;
+[b]var[/b] camera [b]=[/b] [b]new[/b] THREE.PerspectiveCamera([color=#009999]75[/color], aspect_ratio, [color=#009999]1[/color], [color=#009999]10000[/color]);
+camera.position.z [b]=[/b] [color=#009999]500[/color];
+scene.add(camera);
+```
+
+And then convert to:
+
+```
+<fo:block space-before.minimum="0.8em" space-before.optimum="1em" space-before.maximum="1.2em" space-after.minimum="0.8em" space-after.optimum="1em" space-after.maximum="1.2em" hyphenate="false" wrap-option="no-wrap" white-space-collapse="false" white-space-treatment="preserve" linefeed-treatment="preserve" text-align="start" font-family="monospace" font-size="10pt" keep-together.within-column="always" background-color="#E0E0E0" border="0" id="d0e234"><fo:inline font-style="italic" color="grey">// The game area</fo:inline>
+<fo:inline font-weight="bold" color="blue">var</fo:inline> scene = <fo:inline font-weight="bold" color="blue">new</fo:inline> THREE.Scene();
+
+```
