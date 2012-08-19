@@ -45,12 +45,15 @@ class GitScribe
       # TODO: syntax highlighting (fop?)
       # TODO: start chapters on the recto page
       # (initial.page.number=auto-odd? break.before=page-even?)
-      strparams = {'callout.graphics' => 1,
-                   'navig.graphics' => 1,
-                   'admon.textlabel' => 1,
-                   'admon.graphics' => 1,
-                   'page.width' => '7.5in',
-                   'page.height' => '9in'}
+      strparams = {
+        'callout.graphics' => 1,
+        'navig.graphics' => 1,
+        'admon.textlabel' => 1,
+        'admon.graphics' => 1,
+        'page.width' => '7.5in',
+        'page.height' => '9in',
+        'body.font.family' => "'URW Bookman L'"
+      }
       param = strparams.map { |k, v| "--stringparam #{k} #{v}" }.join(' ')
       cmd = "xsltproc  --nonet #{param} --output #{local('book.fo')} #{base('docbook-xsl/fo.xsl')} #{local('book.xml')}"
       ex(cmd)
