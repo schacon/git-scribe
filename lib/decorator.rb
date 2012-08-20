@@ -12,7 +12,7 @@ class Decorator
       /<programlisting(.+?)language="(\w+)"(.*?)>(.+?)<\/programlisting>/m
     ) { |m|
         %Q|<programlisting#{$1}language="#{$2}"#{$3}>| +
-          %Q|//#{$2}\n#{$4}| +
+          %Q|//:::#{$2}:::\n#{$4}| +
         %Q|</programlisting>|
       }
 
@@ -25,15 +25,15 @@ class Decorator
     xml = File.read(@fop)
 
     xml.gsub!(
-      /<fo:block(.+?)(background-color="#E0E0E0")(.*?)>\/\/(\w+)\n(.+?)(<\/fo:block>)/m
+      /<fo:block(.+?)>\/\/:::(\w+):::\n(.+?)(<\/fo:block>)/m
     ) { |m|
 
-        language = $4
-        code = $5
+        language = $2
+        code = $3
 
-        %Q|<fo:block#{$1}#{$2}#{$3}>| +
+        %Q|<fo:block#{$1}>| +
           highlight_fo(code, language) +
-        %Q|#{$6}|
+        %Q|#{$4}|
       }
 
     File.write("#{@fop}", xml)
