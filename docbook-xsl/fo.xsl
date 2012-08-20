@@ -200,10 +200,14 @@
 <xsl:attribute-set name="shade.verbatim.style">
   <xsl:attribute name="background-color">
     <xsl:choose>
-      <xsl:when test="self::programlisting|self::screen">#E0E0E0</xsl:when>
+      <xsl:when test="self::programlisting|self::screen">#F9F9F9</xsl:when>
       <xsl:otherwise>inherit</xsl:otherwise>
     </xsl:choose>
   </xsl:attribute>
+  <xsl:attribute name="border-width">0.5pt</xsl:attribute>
+  <xsl:attribute name="border-style">solid</xsl:attribute>
+  <xsl:attribute name="border-color">#a7a7a7</xsl:attribute>
+  <xsl:attribute name="padding">3pt</xsl:attribute>
 </xsl:attribute-set>
 
 <!--
