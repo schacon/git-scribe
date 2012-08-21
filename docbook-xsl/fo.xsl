@@ -108,6 +108,24 @@
 
 </xsl:template>
 
+<xsl:template name="header.footer.width">
+  <xsl:param name="location" select="'header'"/>
+  <xsl:param name="position" select="1"/>
+
+    <xsl:choose>
+      <xsl:when test="$position = 1">
+        <xsl:value-of select="1"/>
+      </xsl:when>
+      <xsl:when test="$position = 2">
+        <xsl:value-of select="5"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="1"/>
+      </xsl:otherwise>
+    </xsl:choose>
+</xsl:template>
+
+
 <!-- Line break -->
 <xsl:template match="processing-instruction('asciidoc-br')">
   <fo:block/>
