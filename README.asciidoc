@@ -64,7 +64,7 @@ $ brew install https://raw.github.com/adamv/homebrew-alt/master/non-free/kindleg
 
 Initialize a new book with `init`:
 
-    $ git scribe init
+    $ git scribe init <directory name>
 
 This will set up the outline for your book.  All the book content goes into the 'book' subdirectory with 'book.asc' as the starting point.  If you want to split the writing up into multiple files you can simply include them in the book.asc file.  The generated files have an example of this.
 
