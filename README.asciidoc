@@ -34,7 +34,7 @@ You can install git-scribe via RubyGems.
 
     $ gem install git-scribe
 
-For local generation (evenutally pushing to GitHub will handle gen for you), it depends on a couple things like:
+For local generation (eventually pushing to GitHub will handle gen for you), it depends on a couple things like:
 
 * Git
 * Ruby
