@@ -72,7 +72,7 @@ Then you can generate your book content with the 'git scribe gen' command:
 
     $ git scribe gen [site|html|pdf|epub|mobi|all]
 
-Eventually, simply pushing to GitHub will take care of this for you.  For now you can test this auto-generation from the site http://gitscribe.com.  Adding that URL as a post receive hook on your github project will make it try to auto-generate content on push.
+Eventually, simply pushing to GitHub will take care of this for you.  
 
 Roadmap
 =======
