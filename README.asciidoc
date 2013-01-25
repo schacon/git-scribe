@@ -59,7 +59,7 @@ If you are on OSX and using Homebrew http://mxcl.github.com/homebrew/ you can in
 
 ----
 $ brew install asciidoc source-highlight fop
-$ brew install https://raw.github.com/adamv/homebrew-alt/master/non-free/kindlegen.rb
+$ brew install https://gist.github.com/raw/4064648/kindlegen.rb
 ----
 
 Initialize a new book with `init`:
@@ -72,7 +72,7 @@ Then you can generate your book content with the 'git scribe gen' command:
 
     $ git scribe gen [site|html|pdf|epub|mobi|all]
 
-Eventually, simply pushing to GitHub will take care of this for you.  For now you can test this auto-generation from the site http://gitscribe.com.  Adding that URL as a post receive hook on your github project will make it try to auto-generate content on push.
+Eventually, simply pushing to GitHub will take care of this for you.  
 
 Roadmap
 =======
