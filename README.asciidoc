@@ -62,6 +62,16 @@ $ brew install asciidoc source-highlight fop
 $ brew install https://gist.github.com/raw/4064648/kindlegen.rb
 ----
 
+If you are on Ubuntu, you can install the dependencies with apt-get:
+
+----
+$ sudo apt-get install asciidoc
+$ sudo apt-get install source-highlight
+$ sudo apt-get install fop
+----
+
+Kindlegen: http://www.amazon.com/gp/feature.html?ie=UTF8&docId=1000765211
+
 Initialize a new book with `init`:
 
     $ git scribe init <directory name>
