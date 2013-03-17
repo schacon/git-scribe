@@ -52,7 +52,7 @@ class GitScribe
 
       command :gen do |opts|
         opts.banner = "Usage: git scribe gen [options]"
-        opts.description = "generate digital formats"
+        opts.description = "generate digital formats: #{GitScribe::OUTPUT_TYPES.join('|')}"
       end
 
       command :check do |opts|
