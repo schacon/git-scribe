@@ -4,13 +4,21 @@ class GitScribe
     def check(args = [])
       status = {}
 
-      # check for asciidoc
-      if !check_can_run('asciidoc')
-        info "asciidoc is not present, please install it for anything to work"
-        status[:asciidoc] = false
+      asciidoc_cmd = nil
+      # check for asciidoc or asciidoctor
+      if !check_can_run('asciidoctor --version')
+        if !check_can_run('asciidoc')
+          info "neither asciidoc or asciidoctor are present, please install one of these for anything to work"
+          status[:asciidoc] = false
+        else
+          info "asciidoc - ok"
+          status[:asciidoc] = true
+          asciidoc_cmd = 'asciidoc'
+        end
       else
-        info "asciidoc - ok"
+        info "asciidoc (using asciidoctor) - ok"
         status[:asciidoc] = true
+        asciidoc_cmd = 'asciidoctor'
       end
 
       # check for xsltproc
@@ -31,15 +39,24 @@ class GitScribe
         status[:a2x] = true
       end
 
-      # check for source-highlight
-      if !check_can_run('source-highlight --version')
-        info "source-highlight is not present, please install it for source code highlighting"
-        status[:highlight] = false
+      # check for source-highlight or coderay
+      if asciidoc_cmd == 'asciidoctor'
+        if !check_can_run('coderay --version')
+          info "coderay is not present, please install it for source code highlighting"
+          status[:highlight] = false
+        else
+          info "highlighting (using CodeRay) - ok"
+          status[:highlight] = true
+        end
       else
-        info "highlighting - ok"
-        status[:highlight] = true
+        if !check_can_run('source-highlight --version')
+          info "source-highlight is not present, please install it for source code highlighting"
+          status[:highlight] = false
+        else
+          info "highlighting - ok"
+          status[:highlight] = true
+        end
       end
-
 
       # check for fop
       if !check_can_run('fop -v -out list')

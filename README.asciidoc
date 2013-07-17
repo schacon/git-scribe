@@ -3,8 +3,7 @@ Git Scribe
 
 image::https://travis-ci.org/schacon/git-scribe.png[Build Status,link="https://travis-ci.org/schacon/git-scribe"]
 
-The git-scribe tool is a simple command line toolset to help you use Git, GitHub and Asciidoc
-to write e-books.  This provides tools for setting up the structure, collaborating with co-authors, doing technical and copy-editing, handling translations, taking errata, as well as publishing online, pdf, mobi (Kindle) and epub (iBooks, Nook) versions.
+The git-scribe tool is a simple command line toolset to help you use Git, GitHub and AsciiDoc to write e-books.  This provides tools for setting up the structure, collaborating with co-authors, doing technical and copy-editing, handling translations, taking errata, as well as publishing online, pdf, mobi (Kindle) and epub (iBooks, Nook) versions.
 
 The project is targeted for writing books of any length, but should also be usable for articles and stuff too, though for a while you'll have to just do it as a really short book.
 
@@ -20,9 +19,9 @@ Eventually, these are the feature goals for the project:
 * Translation workflow tools
 * Selling (possibly): Kindle, iBooks, Lulu, Pledgie(?)
 
-The idea is that you use the tool to generate a known structure, write in asciidoc and let the tool handle everything else for you.  I want authors to be able to focus on writing and not have to worry about anything else (website, multiple format generation, etc).
+The idea is that you use the tool to generate a known structure, write in AsciiDoc and let the tool handle everything else for you.  I want authors to be able to focus on writing and not have to worry about anything else (website, multiple format generation, etc).
 
-A good AsciiDoc cheat sheet: http://powerman.name/doc/asciidoc#_text
+A good AsciiDoc cheat sheet: http://asciidoctor.org/docs/asciidoc-syntax-quick-reference/
 
 Disclaimer
 ==========
@@ -41,8 +40,10 @@ For local generation (eventually pushing to GitHub will handle gen for you), it 
 * Git
 * Ruby
 * asciidoc, a2x (8.6.4)
+** asciidoctor can be used in place of asciidoc
 * xsltproc
 * source-highlight (3.1)
+** coderay is required when using asciidoctor
 * FOP (1.0) - for PDF generation
 
 Usage
