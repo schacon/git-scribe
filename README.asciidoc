@@ -1,6 +1,8 @@
 Git Scribe
 ==========
 
+https://travis-ci.org/schacon/git-scribe[image::https://travis-ci.org/schacon/git-scribe.png[Build Status]]
+
 The git-scribe tool is a simple command line toolset to help you use Git, GitHub and Asciidoc
 to write e-books.  This provides tools for setting up the structure, collaborating with co-authors, doing technical and copy-editing, handling translations, taking errata, as well as publishing online, pdf, mobi (Kindle) and epub (iBooks, Nook) versions.
 
