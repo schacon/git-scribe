@@ -17,7 +17,7 @@ context "scribe check tests" do
   # see http://svn.apache.org/repos/asf/xmlgraphics/fop/trunk/src/java/org/apache/fop/cli/CommandLineOptions.java
   test "scribe should correctly check fop availability" do
     assert_equal @scribe.check_can_run('fop -v -out list'), true
-    assert_equal @scribe.check_can_run('fop -v'), false
+    assert_equal @scribe.check_can_run('fop -version'), true
     assert_equal @scribe.check_can_run('fop -failboat'), false
   end
 end

@@ -358,12 +358,12 @@ class GitScribe
     end
 
     def run_xslt(jar_arguments, java_options)
+      # xslthl config must be passed as an xsl param (highlight.xslthl.config), not a system property (xslthl.config)
       ex <<-SH
         java -cp "#{base('vendor/saxon.jar')}#{classpath_delimiter}#{base('vendor/xslthl-2.0.2.jar')}" \
-             -Dxslthl.config=file://"#{base('docbook-xsl/highlighting/xslthl-config.xml')}" \
              #{java_options.map { |k, v| "-D#{k}=#{v}" }.join(' ')} \
-             com.icl.saxon.StyleSheet \
-             #{jar_arguments}
+             com.icl.saxon.StyleSheet #{jar_arguments} \
+             highlight.xslthl.config="file://#{base('docbook-xsl/highlighting/xslthl-config.xml')}"
       SH
     end
   end
