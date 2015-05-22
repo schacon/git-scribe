@@ -155,4 +155,6 @@
   <xsl:attribute name="keep-together.within-column">auto</xsl:attribute>
 </xsl:attribute-set>
 
+<xsl:template name="root.messages"/>
+
 </xsl:stylesheet>

@@ -48,7 +48,7 @@ class GitScribe
     def do_docbook
       return true if @done['docbook']
       info "GENERATING DOCBOOK"
-      if ex("asciidoc -b docbook #{BOOK_FILE}")
+      if ex("#{@config['asciidoc']} -b docbook #{BOOK_FILE}")
         @done['docbook'] = true
         'book.xml'
       end
@@ -96,8 +96,12 @@ class GitScribe
       return true if @done['html']
       info "GENERATING HTML"
       # TODO: look for custom stylesheets
-      stylesheet = local('stylesheets') + '/scribe.css'
-      cmd = "asciidoc -a stylesheet=#{stylesheet} #{BOOK_FILE}"
+      if @config['asciidoc'] == 'asciidoctor'
+        cmd = "asciidoctor -a source-highlighter=coderay -a icons=font -a sectanchors #{BOOK_FILE}"
+      else
+        stylesheet = local('stylesheets') + '/scribe.css'
+        cmd = "asciidoc -a stylesheet=#{stylesheet} #{BOOK_FILE}"
+      end
       if ex(cmd)
         @done['html'] == true
         'book.html'
@@ -108,7 +112,7 @@ class GitScribe
       info "GENERATING SITE"
       # TODO: check if html was already done
 
-      ex "asciidoc -b docbook #{BOOK_FILE}"
+      ex "#{@config['asciidoc']} -b docbook #{BOOK_FILE}"
       run_xslt "book.xml #{base('docbook-xsl/xhtml/chunk.xsl')}", "html.stylesheet" => 1
 
       source = File.read('index.html')
@@ -354,12 +358,12 @@ class GitScribe
     end
 
     def run_xslt(jar_arguments, java_options)
+      # xslthl config must be passed as an xsl param (highlight.xslthl.config), not a system property (xslthl.config)
       ex <<-SH
         java -cp "#{base('vendor/saxon.jar')}#{classpath_delimiter}#{base('vendor/xslthl-2.0.2.jar')}" \
-             -Dxslthl.config=file://"#{base('docbook-xsl/highlighting/xslthl-config.xml')}" \
              #{java_options.map { |k, v| "-D#{k}=#{v}" }.join(' ')} \
-             com.icl.saxon.StyleSheet \
-             #{jar_arguments}
+             com.icl.saxon.StyleSheet #{jar_arguments} \
+             highlight.xslthl.config="file://#{base('docbook-xsl/highlighting/xslthl-config.xml')}"
       SH
     end
   end

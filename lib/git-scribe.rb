@@ -29,6 +29,21 @@ class GitScribe
     @args = []
     @options = {}
     @config = YAML::parse(File.open(local('.gitscribe'))).transform rescue {}
+    unless @config['asciidoc']
+      if check_can_run('asciidoctor --version')
+        @config['asciidoc'] = 'asciidoctor'
+      else
+        @config['asciidoc'] = 'asciidoc'
+      end
+    end
+
+    unless @config['source-highlighter']
+      if @config['asciidoc'] == 'asciidoctor'
+        @config['source-highlighter'] = 'coderay'
+      else
+        @config['source-highlighter'] = 'source-highlight'
+      end
+    end
   end
 
   ## COMMANDS ##
