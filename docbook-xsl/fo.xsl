@@ -49,6 +49,18 @@
 <!-- Default fetches image from Internet (long timeouts) -->
 <xsl:param name="draft.watermark.image" select="''"/>
 
+<!-- Front cover -->
+<xsl:template name="front.cover">
+  <xsl:call-template name="page.sequence">
+    <xsl:with-param name="master-reference">my-titlepage</xsl:with-param>
+    <xsl:with-param name="content">
+      <fo:block text-align="center">
+        <fo:external-graphic src="url(images/cover.jpg)" content-height="9in"/>
+      </fo:block>
+    </xsl:with-param>
+  </xsl:call-template>
+</xsl:template>
+
 <!-- Line break -->
 <xsl:template match="processing-instruction('asciidoc-br')">
   <fo:block/>
