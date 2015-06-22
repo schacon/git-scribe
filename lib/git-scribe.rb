@@ -22,7 +22,7 @@ class GitScribe
 
   #Allow overrides of the config files so we let the user have multiple versions of the book
   #maybe multiple languages or different formats
-  OVERRIDE_NAME = ENV["GITSCRIBE_BOOK_FILE"]
+  OVERRIDE_NAME = ENV["GITSCRIBE_BOOK_FILE"]  || ""
   BOOK_FILE = 'book.asc'
   OUTPUT_TYPES = ['docbook', 'html', 'pdf', 'epub', 'mobi', 'site', 'ebook']
   SCRIBE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))
