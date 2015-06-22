@@ -34,10 +34,6 @@ class GitScribe
         Dir.mkdir('stylesheets') rescue nil
         from_stdir = File.join(SCRIBE_ROOT, 'stylesheets')
         FileUtils.cp_r from_stdir, '.'
-
-        if OVERRIDE_NAME != "" 
-          FileUtils.mv OVERRIDE_NAME, "book.asc"
-        end
       end
     end
 
@@ -335,6 +331,10 @@ class GitScribe
     def gather_and_process
       files = Dir.glob("book/*")
       FileUtils.cp_r files, 'output', :remove_destination => true
+
+      if OVERRIDE_NAME != "" 
+        FileUtils.mv OVERRIDE_NAME, "book.asc"
+      end
     end
 
     def ex(command)
