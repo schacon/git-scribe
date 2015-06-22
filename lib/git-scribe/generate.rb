@@ -34,6 +34,10 @@ class GitScribe
         Dir.mkdir('stylesheets') rescue nil
         from_stdir = File.join(SCRIBE_ROOT, 'stylesheets')
         FileUtils.cp_r from_stdir, '.'
+
+        if OVERRIDE_NAME != "" 
+          FileUtils.mv OVERRIDE_NAME, "book.asc"
+        end
       end
     end
 
