@@ -20,15 +20,21 @@ class GitScribe
   attr_accessor :subcommand, :args, :options
   attr_reader :info
 
-  BOOK_FILE = 'book.asc'
-  OUTPUT_TYPES = ['docbook', 'html', 'pdf', 'epub', 'mobi', 'site']
+  #Allow overrides of the config files so we let the user have multiple versions of the book
+  #maybe multiple languages or different formats
+  BOOK_FILE = ENV["GITSCRIBE_BOOK_FILE"]
+  BOOK_FILE ||= 'book.asc'
+  OUTPUT_TYPES = ['docbook', 'html', 'pdf', 'epub', 'mobi', 'site', 'ebook']
   SCRIBE_ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 
   def initialize
     @subcommand = nil
     @args = []
     @options = {}
-    @config = YAML::parse(File.open(local('.gitscribe'))).transform rescue {}
+    configfilename =  ENV["GITSCRIBE_CONFIG_FILE"]
+    configfilename ||= '.gitscribe'
+    @config = YAML::parse(File.open(local(configfilename))).transform rescue {}
+    @decorate = Decorator.new
   end
 
   ## COMMANDS ##
