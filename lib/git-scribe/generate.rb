@@ -333,7 +333,7 @@ class GitScribe
       FileUtils.cp_r files, 'output', :remove_destination => true
 
       if OVERRIDE_NAME != "" 
-        FileUtils.mv OVERRIDE_NAME, "book.asc"
+        FileUtils.mv "output/#{OVERRIDE_NAME}", "output/book.asc"
       end
     end
 
