@@ -38,7 +38,7 @@ class GitScribe
     end
 
     def a2x(type)
-      "a2x -f #{type} -d book "
+      "a2x -f #{type} -d book --no-xmllint "
     end
 
     def a2x_wss(type)
