@@ -38,7 +38,7 @@ class GitScribe
     end
 
     def a2x(type)
-      "a2x -f #{type} -d book "
+      "a2x -f #{type} -d book --no-xmllint "
     end
 
     def a2x_wss(type)
@@ -331,6 +331,10 @@ class GitScribe
     def gather_and_process
       files = Dir.glob("book/*")
       FileUtils.cp_r files, 'output', :remove_destination => true
+
+      if OVERRIDE_NAME != "" 
+        FileUtils.mv "output/#{OVERRIDE_NAME}", "output/book.asc"
+      end
     end
 
     def ex(command)
